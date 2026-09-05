@@ -31,6 +31,8 @@ export function AmixStoreGallery({
   const progress = useRef(0);
   const [progressUi, setProgressUi] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
+  const [compact, setCompact] = useState(false);
 
   // first product LEFT (big), then RIGHT, then LEFT…
   const sides = useMemo(() => products.map((_, i) => (i % 2 === 0 ? -1 : 1)), [products]);
@@ -39,10 +41,20 @@ export function AmixStoreGallery({
   const introDone = progressUi > 0.1;
   const productProgress = Math.max(0, (progressUi - 0.12) / 0.88);
   const current = active >= 0 ? products[active] : null;
-  const sideLabel = active < 0 ? "" : active % 2 === 0 ? "Featured left" : "Featured right";
+  const sideLabel =
+    active < 0 ? "" : compact ? "Featured" : active % 2 === 0 ? "Featured left" : "Featured right";
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1024px)");
+    const apply = () => setCompact(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
     const el = scroller.current;
+    const sticky = stickyRef.current;
     if (!el) return;
     const onScroll = () => {
       const max = el.scrollHeight - el.clientHeight;
@@ -61,12 +73,25 @@ export function AmixStoreGallery({
       e.preventDefault();
       el.scrollTop += e.deltaY;
     };
+    let lastY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      lastY = e.touches[0]?.clientY ?? 0;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY ?? lastY;
+      el.scrollTop += lastY - y;
+      lastY = y;
+    };
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", onWheel, { passive: false });
+    sticky?.addEventListener("touchstart", onTouchStart, { passive: true });
+    sticky?.addEventListener("touchmove", onTouchMove, { passive: true });
     onScroll();
     return () => {
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", onWheel);
+      sticky?.removeEventListener("touchstart", onTouchStart);
+      sticky?.removeEventListener("touchmove", onTouchMove);
     };
   }, [products.length]);
 
@@ -80,7 +105,7 @@ export function AmixStoreGallery({
 
   return (
     <section
-      className="amix3 amix3-light"
+      className={`amix3 amix3-light ${compact ? "amix3-compact" : ""}`}
       style={{
         ["--a" as string]: accent,
         ["--store-bg" as string]: theme.floor,
@@ -93,19 +118,20 @@ export function AmixStoreGallery({
         <div className="amix3-spacer" style={{ height: `${(2 + products.length) * 95}vh` }} />
       </div>
 
-      <div className="amix3-sticky">
+      <div className="amix3-sticky" ref={stickyRef}>
         <button type="button" className="amix3-back" onClick={onBack}>
-          ← Back to lobby
+          <span className="amix3-back-full">← Back to lobby</span>
+          <span className="amix3-back-short">← Lobby</span>
         </button>
 
         <motion.div
           className={`amix3-title ${titleMode ? "hero" : "dock"}`}
           animate={{
-            top: titleMode ? "50%" : "4.55rem",
-            left: titleMode ? "50%" : "1.1rem",
+            top: titleMode ? "48%" : compact ? "4.35rem" : "4.55rem",
+            left: titleMode ? "50%" : "1rem",
             x: titleMode ? "-50%" : "0%",
             y: titleMode ? "-50%" : "0%",
-            scale: titleMode ? 1 : 0.38,
+            scale: titleMode ? 1 : compact ? 0.48 : 0.38,
           }}
           transition={{ type: "spring", stiffness: 130, damping: 18 }}
         >
@@ -114,12 +140,21 @@ export function AmixStoreGallery({
           </p>
           <h2 className="amix3-store-name">{store.name}</h2>
           {titleMode && (
-            <span className="amix3-start">Scroll to browse the full collection</span>
+            <span className="amix3-start">
+              {compact ? "Swipe to browse" : "Scroll to browse the full collection"}
+            </span>
           )}
         </motion.div>
 
         <div className="amix3-canvas">
-          <Canvas camera={{ position: [0, 0.55, 6.2], fov: 38 }} dpr={[1, 1.75]} gl={{ antialias: true }}>
+          <Canvas
+            camera={{
+              position: compact ? [0, 0.45, 7.4] : [0, 0.55, 6.2],
+              fov: compact ? 42 : 38,
+            }}
+            dpr={compact ? [1, 1.35] : [1, 1.75]}
+            gl={{ antialias: !compact }}
+          >
             <color attach="background" args={[theme.floor]} />
             <fog attach="fog" args={[theme.floor, 11, 28]} />
             <ambientLight intensity={1.25} />
@@ -142,6 +177,7 @@ export function AmixStoreGallery({
                 activeIndex={active}
                 accent={theme.accent}
                 primary={theme.primary}
+                compact={compact}
                 onSelect={(i) => {
                   jumpTo(i);
                   const p = products[i];
@@ -206,10 +242,14 @@ export function AmixStoreGallery({
         </div>
         <p className="amix3-hint">
           {titleMode
-            ? "Scroll to explore products"
-            : active % 2 === 0
-              ? "Product left · details right"
-              : "Product right · details left"}
+            ? compact
+              ? "Swipe up to explore products"
+              : "Scroll to explore products"
+            : compact
+              ? "Swipe for next · tap details below"
+              : active % 2 === 0
+                ? "Product left · details right"
+                : "Product right · details left"}
         </p>
       </div>
     </section>
@@ -297,6 +337,7 @@ function ProductField({
   activeIndex,
   accent,
   primary,
+  compact,
   onSelect,
 }: {
   products: Product[];
@@ -304,6 +345,7 @@ function ProductField({
   activeIndex: number;
   accent: string;
   primary: string;
+  compact: boolean;
   onSelect: (i: number) => void;
 }) {
   const activeRef = useRef(activeIndex);
@@ -320,6 +362,7 @@ function ProductField({
           activeRef={activeRef}
           accent={accent}
           primary={primary}
+          compact={compact}
           onSelect={() => onSelect(i)}
         />
       ))}
@@ -334,6 +377,7 @@ function ShowcaseCard({
   activeRef,
   accent,
   primary,
+  compact,
   onSelect,
 }: {
   product: Product;
@@ -342,6 +386,7 @@ function ShowcaseCard({
   activeRef: React.MutableRefObject<number>;
   accent: string;
   primary: string;
+  compact: boolean;
   onSelect: () => void;
 }) {
   const root = useRef<THREE.Group>(null);
@@ -369,19 +414,19 @@ function ShowcaseCard({
 
     enter.current = THREE.MathUtils.damp(enter.current, isOn ? 1 : 0, isOn ? 6.5 : 11, dt);
 
-    // clear left / right resting positions — leave center clear for focus
-    const restX = side * (isLeft ? 1.72 : 1.72);
-    const offX = offSide.current * 9.2;
+    // Mobile/tablet: keep cards nearer center so they stay fully visible
+    const restX = compact ? side * 0.55 : side * 1.72;
+    const offX = offSide.current * (compact ? 6.4 : 9.2);
     const x = THREE.MathUtils.lerp(offX, restX, enter.current);
-    const y = THREE.MathUtils.lerp(0.05, 0.42, enter.current);
-    const z = THREE.MathUtils.lerp(8, 0.15, enter.current);
-    const base = isLeft ? 1.42 : 1.28;
+    const y = THREE.MathUtils.lerp(0.05, compact ? 0.85 : 0.42, enter.current);
+    const z = THREE.MathUtils.lerp(8, compact ? 0.35 : 0.15, enter.current);
+    const base = compact ? (isLeft ? 1.05 : 0.98) : isLeft ? 1.42 : 1.28;
     const s = base * enter.current;
 
     root.current.position.set(x, y, z);
     root.current.rotation.y = THREE.MathUtils.lerp(
       offSide.current * 0.75,
-      side * 0.12,
+      compact ? side * 0.04 : side * 0.12,
       enter.current,
     );
     root.current.rotation.z = THREE.MathUtils.lerp(offSide.current * 0.05, 0, enter.current);
@@ -402,8 +447,8 @@ function ShowcaseCard({
     }
   });
 
-  const w = isLeft ? 1.78 : 1.58;
-  const h = isLeft ? 2.28 : 2.05;
+  const w = compact ? (isLeft ? 1.45 : 1.35) : isLeft ? 1.78 : 1.58;
+  const h = compact ? (isLeft ? 1.85 : 1.72) : isLeft ? 2.28 : 2.05;
 
   return (
     <group ref={root} visible={false}>

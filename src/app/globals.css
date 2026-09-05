@@ -1653,3 +1653,453 @@ input {
     font-size: clamp(2.4rem, 14vw, 4rem);
   }
 }
+
+/* ========== Mobile + tablet optimization ========== */
+
+.amix3-back-short {
+  display: none;
+}
+
+.mp-nav-brand {
+  min-width: 0;
+}
+
+.mp-nav-sub {
+  display: block;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.mp,
+.lp,
+.fl-endless,
+.fl-lobby,
+.amix3,
+.pp {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.mp-nav,
+.lp-top {
+  padding-top: max(0.85rem, env(safe-area-inset-top));
+}
+
+.mp-nav-actions button,
+.lp-top button,
+.lp-cta .primary,
+.fl-land-cta .primary,
+.fl-sub-rail button,
+.pp-actions button,
+.amix3-actions button,
+.amix3-back,
+.pp-back {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .mp-nav {
+    gap: 0.55rem;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+    align-items: flex-start;
+  }
+
+  .mp-nav-actions {
+    justify-content: flex-end;
+    max-width: min(68vw, 420px);
+  }
+
+  .mp-nav-actions button {
+    padding: 0.48rem 0.78rem;
+    font-size: 0.82rem;
+  }
+
+  .lp-copy,
+  .fl-land-copy {
+    bottom: clamp(4.8rem, 11vh, 6.5rem);
+  }
+
+  .lp-cta {
+    flex-wrap: wrap;
+  }
+
+  .fl-lobby {
+    padding-top: 4.4rem;
+  }
+
+  .fl-lobby-hero {
+    min-height: 32vh;
+    margin-left: 0.85rem;
+    margin-right: 0.85rem;
+  }
+
+  .fl-lobby-stack {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+
+  .fl-sub-rail {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .fl-sub-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .fl-door-media {
+    height: 220px;
+  }
+
+  .amix3-back {
+    top: max(4.2rem, calc(env(safe-area-inset-top) + 3.4rem));
+  }
+
+  .pp-back {
+    top: max(4.2rem, calc(env(safe-area-inset-top) + 3.4rem));
+  }
+
+  .amix3-review {
+    max-height: min(36vh, 380px);
+  }
+
+  .amix3-actions {
+    gap: 0.4rem;
+  }
+
+  .amix3-actions button {
+    flex: 1 1 auto;
+    min-width: calc(50% - 0.4rem);
+    justify-content: center;
+  }
+
+  .amix3-progress {
+    bottom: max(2rem, calc(env(safe-area-inset-bottom) + 1.4rem));
+  }
+
+  .amix3-hint {
+    bottom: max(0.35rem, env(safe-area-inset-bottom));
+  }
+
+  .fl-land-dots,
+  .fl-endless .mp-floor-dots {
+    bottom: max(0.85rem, calc(env(safe-area-inset-bottom) + 0.5rem));
+  }
+
+  .lp-scroll,
+  .fl-land-cue {
+    bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.55rem));
+  }
+}
+
+/* Phone + small tablet portrait */
+@media (max-width: 900px) {
+  .mp-nav {
+    flex-wrap: wrap;
+    row-gap: 0.45rem;
+  }
+
+  .mp-nav-actions {
+    max-width: none;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .mp-nav-signup {
+    display: none;
+  }
+
+  .mp-nav-sub {
+    font-size: 0.74rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 92vw;
+  }
+
+  .lp-top {
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+  }
+
+  .lp-top-actions button {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.82rem;
+  }
+
+  .lp-copy h1 {
+    font-size: clamp(2.7rem, 15vw, 4.6rem);
+  }
+
+  .lp-lead,
+  .fl-land-lead {
+    font-size: 0.98rem;
+  }
+
+  .fl-land-subs {
+    gap: 0.3rem;
+  }
+
+  .fl-land-subs li {
+    font-size: 0.64rem;
+    padding: 0.28rem 0.55rem;
+  }
+
+  .fl-land-copy,
+  .lp-copy {
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+  }
+
+  .fl-lobby-hero {
+    min-height: 28vh;
+    border-radius: 1.1rem;
+  }
+
+  .fl-door-stack,
+  .fl-door-stack.right {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .fl-door-stack.right .fl-door-media {
+    order: 0;
+  }
+
+  .amix3-back-full {
+    display: none;
+  }
+
+  .amix3-back-short {
+    display: inline;
+  }
+
+  .amix3-review.dock-right,
+  .amix3-review.dock-left {
+    left: 50%;
+    right: auto;
+    top: auto;
+    bottom: max(3.1rem, calc(env(safe-area-inset-bottom) + 2.5rem));
+    transform: translateX(-50%);
+    width: min(440px, calc(100vw - 1.25rem));
+    max-height: min(34vh, 320px);
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  .amix3-review h3 {
+    font-size: clamp(1.15rem, 4.5vw, 1.45rem);
+  }
+
+  .amix3-copy {
+    -webkit-line-clamp: 2;
+    font-size: 0.84rem;
+  }
+
+  .amix3-review ul {
+    display: none;
+  }
+
+  .amix3-price {
+    font-size: 1.3rem;
+  }
+
+  .pp {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(38vh, 44vh) auto;
+  }
+
+  .pp-sheet {
+    margin: -1.4rem 0 0;
+    border-left: 0;
+    border-radius: 1.25rem 1.25rem 0 0;
+    padding: 1.25rem 1.1rem max(1.5rem, env(safe-area-inset-bottom));
+    box-shadow: var(--shadow);
+  }
+
+  .pp-actions {
+    position: sticky;
+    bottom: 0;
+    padding-top: 0.35rem;
+    background: linear-gradient(180deg, transparent, var(--surface) 28%);
+  }
+
+  .pp-actions button {
+    flex: 1 1 auto;
+  }
+
+  .mp-sheet {
+    width: min(440px, 100%);
+    max-height: min(86dvh, 720px);
+    padding: 1rem;
+  }
+
+  .mp-overlay {
+    padding: 0.65rem;
+    align-items: end;
+  }
+
+  .mp-overlay .mp-sheet {
+    width: 100%;
+    border-radius: 1.15rem 1.15rem 0.65rem 0.65rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .mp-nav-sub {
+    display: none;
+  }
+
+  .mp-nav-orders {
+    display: none;
+  }
+
+  .mp-nav-actions button {
+    padding: 0.42rem 0.7rem;
+    font-size: 0.78rem;
+  }
+
+  .lp-top strong {
+    font-size: 1rem;
+  }
+
+  .lp-copy {
+    bottom: clamp(4.2rem, 10vh, 5.5rem);
+  }
+
+  .lp-cta .primary,
+  .fl-land-cta .primary {
+    width: 100%;
+    text-align: center;
+    padding: 0.9rem 1.2rem;
+  }
+
+  .fl-endless-hint {
+    display: none;
+  }
+
+  .fl-door-media {
+    height: 180px;
+  }
+
+  .fl-lobby {
+    padding-top: 4rem;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+
+  .fl-lobby-hero > div {
+    padding: 1.1rem 1rem;
+  }
+
+  .amix3-title.hero {
+    width: min(92vw, 520px);
+    padding: 0 0.5rem;
+  }
+
+  .amix3-title.hero .amix3-store-name {
+    font-size: clamp(2.2rem, 12vw, 3.4rem);
+  }
+
+  .amix3-start {
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+  }
+
+  .amix3-plane-label {
+    max-width: 110px;
+    font-size: 0.6rem;
+  }
+
+  .amix3-plane-label.big {
+    max-width: 130px;
+    font-size: 0.68rem;
+  }
+
+  .pp-sheet h1 {
+    font-size: clamp(1.55rem, 7vw, 2.2rem);
+  }
+
+  .pp-sheet li {
+    grid-template-columns: 64px 1fr;
+    font-size: 0.86rem;
+  }
+
+  .fl-land-dots button,
+  .mp-floor-dots button {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* Narrow phones */
+@media (max-width: 420px) {
+  .mp-nav-actions {
+    gap: 0.35rem;
+  }
+
+  .amix3-actions .bag:last-child {
+    width: 100%;
+  }
+
+  .lp-copy h1,
+  .fl-land-copy h1 {
+    font-size: clamp(2.35rem, 14vw, 3.4rem);
+  }
+}
+
+/* Tablet landscape comfort */
+@media (min-width: 721px) and (max-width: 1100px) and (orientation: landscape) {
+  .lp-copy,
+  .fl-land-copy {
+    bottom: clamp(3.2rem, 8vh, 4.8rem);
+    max-width: min(32rem, 52vw);
+  }
+
+  .lp-copy h1,
+  .fl-land-copy h1 {
+    font-size: clamp(2.6rem, 7vw, 4.2rem);
+  }
+
+  .fl-lobby-hero {
+    min-height: 42vh;
+  }
+
+  .amix3-review.dock-right,
+  .amix3-review.dock-left {
+    top: 16%;
+    bottom: auto;
+    transform: none;
+    max-height: min(58vh, 420px);
+  }
+
+  .amix3-review.dock-right {
+    right: 1rem;
+    left: auto;
+  }
+
+  .amix3-review.dock-left {
+    left: 1rem;
+    right: auto;
+  }
+
+  .pp {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  .pp-sheet {
+    margin: 0;
+    border-radius: 0;
+    border-left: 1px solid var(--line);
+    box-shadow: none;
+    padding: 4.5rem 1.25rem 1.5rem;
+  }
+}

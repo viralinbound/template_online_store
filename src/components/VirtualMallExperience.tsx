@@ -266,9 +266,9 @@ export function VirtualMallExperience() {
       ) : (
         <>
           <header className={`mp-nav ${phase === "floors" ? "mp-nav-dark" : ""}`}>
-            <div>
+            <div className="mp-nav-brand">
               <strong>MegaMall</strong>
-              <span>
+              <span className="mp-nav-sub">
                 Floor {current.label} · {current.categoryName}
                 {phaseHint}
               </span>
@@ -291,7 +291,7 @@ export function VirtualMallExperience() {
               )}
               {liveSession ? (
                 <>
-                  <button type="button" onClick={() => setShowOrders(true)}>
+                  <button type="button" className="mp-nav-orders" onClick={() => setShowOrders(true)}>
                     Orders ({myOrders.length})
                   </button>
                   <button type="button" onClick={logout} title={liveSession.email}>
@@ -303,7 +303,11 @@ export function VirtualMallExperience() {
                   <button type="button" onClick={() => setShowAuth(true, "login")}>
                     Sign in
                   </button>
-                  <button type="button" onClick={() => setShowAuth(true, "signup")}>
+                  <button
+                    type="button"
+                    className="mp-nav-signup"
+                    onClick={() => setShowAuth(true, "signup")}
+                  >
                     Create account
                   </button>
                 </>
@@ -645,7 +649,7 @@ function Intro({
               <button type="button" onClick={() => onAuth("login")}>
                 Sign in
               </button>
-              <button type="button" onClick={() => onAuth("signup")}>
+              <button type="button" className="mp-nav-signup" onClick={() => onAuth("signup")}>
                 Create account
               </button>
             </>

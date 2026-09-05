@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Syne, DM_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -18,6 +18,14 @@ export const metadata: Metadata = {
   title: "MegaMall — Premium Virtual Retail",
   description:
     "Explore professional floor destinations, curated store collections, and shop with secure account checkout.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#0f3d40",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
