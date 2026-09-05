@@ -1,15 +1,123 @@
 import type { MallFloor, MallCategory, Product, StoreNode } from "@/types/mall";
 import { categoryCollageImage, productImage, storeDoorImage } from "@/lib/images";
 
+/** Professional catalog lines — name matches curated photo */
 const categoryPools: Record<MallCategory, string[]> = {
-  fashion: ["Jacket", "Sneaker", "Denim", "Shirt", "Watch", "Coat", "Hoodie"],
-  beauty: ["Serum", "Lipstick", "Perfume", "Mask", "Cleanser", "Cream"],
-  electronics: ["Laptop", "Phone", "Tablet", "Camera", "Speaker", "Monitor"],
-  sports: ["Trainer", "Football", "Yoga Mat", "Running Shoe", "Bottle", "Jersey"],
-  home: ["Sofa", "Lamp", "Chair", "Cookware", "Curtain", "Rug"],
-  luxury: ["Designer Bag", "Limited Watch", "Diamond Ring", "Silk Suit", "Fragrance"],
-  food: ["Coffee Kit", "Snack Box", "Tea Set", "Cookie Pack", "Juice Mix", "Pastry"],
-  gaming: ["Headset", "Controller", "Keyboard", "Console", "Mouse", "Chair"],
+  fashion: [
+    "Merino Overcoat",
+    "City Runner",
+    "Selvedge Denim",
+    "Oxford Shirt",
+    "Field Watch",
+    "Wool Topcoat",
+    "Studio Hoodie",
+  ],
+  beauty: [
+    "Vitamin C Serum",
+    "Satin Lip Color",
+    "Eau de Parfum",
+    "Clay Mask",
+    "Gentle Cleanser",
+    "Night Cream",
+  ],
+  electronics: [
+    "Ultrabook Pro",
+    "Flagship Phone",
+    "Pro Tablet",
+    "Mirrorless Camera",
+    "Bluetooth Speaker",
+    "4K Display",
+  ],
+  sports: [
+    "Trail Trainer",
+    "Match Football",
+    "Studio Yoga Mat",
+    "Road Running Shoe",
+    "Insulated Bottle",
+    "Team Jersey",
+  ],
+  home: [
+    "Lounge Sofa",
+    "Arc Floor Lamp",
+    "Dining Chair",
+    "Copper Cookware",
+    "Linen Curtain",
+    "Wool Area Rug",
+  ],
+  luxury: [
+    "Leather Tote",
+    "Heritage Chronograph",
+    "Solitaire Ring",
+    "Silk Evening Suit",
+    "Signature Fragrance",
+  ],
+  food: [
+    "Barista Coffee Set",
+    "Gourmet Snack Box",
+    "Porcelain Tea Set",
+    "Artisan Cookies",
+    "Cold-Pressed Juice",
+    "Butter Croissant",
+  ],
+  gaming: [
+    "Studio Headset",
+    "Pro Controller",
+    "Mechanical Keyboard",
+    "Next-Gen Console",
+    "Precision Mouse",
+    "Ergo Desk Chair",
+  ],
+};
+
+const productBlurbs: Record<string, string> = {
+  "Merino Overcoat": "Tailored merino wool overcoat with a clean silhouette for cooler seasons.",
+  "City Runner": "Lightweight everyday runner engineered for comfort across long city walks.",
+  "Selvedge Denim": "Premium selvedge denim with a refined wash and lasting structure.",
+  "Oxford Shirt": "Crisp oxford cotton shirt suited for workdays and smart-casual evenings.",
+  "Field Watch": "Minimal stainless-steel timepiece with a precision quartz movement.",
+  "Wool Topcoat": "Full-length wool topcoat with a structured lapel and polished finish.",
+  "Studio Hoodie": "Heavyweight fleece hoodie designed for layered everyday wear.",
+  "Vitamin C Serum": "Brightening serum formulated for even tone and everyday skin clarity.",
+  "Satin Lip Color": "Long-wear satin lip color with a smooth, comfortable finish.",
+  "Eau de Parfum": "Layered eau de parfum with lasting projection and a modern signature.",
+  "Clay Mask": "Purifying clay mask that refreshes and balances the skin.",
+  "Gentle Cleanser": "Dermatologist-inspired cleanser for a clean feel without dryness.",
+  "Night Cream": "Restorative night cream that supports overnight skin recovery.",
+  "Ultrabook Pro": "Slim performance laptop built for work, travel, and creative workflows.",
+  "Flagship Phone": "Flagship smartphone with a vivid display and all-day battery design.",
+  "Pro Tablet": "High-resolution tablet for reading, sketching, and on-the-go productivity.",
+  "Mirrorless Camera": "Compact mirrorless camera for sharp stills and cinematic video.",
+  "Bluetooth Speaker": "Portable speaker with rich sound and a durable everyday chassis.",
+  "4K Display": "Color-accurate 4K monitor for design, editing, and focused desk work.",
+  "Trail Trainer": "Supportive trail trainer for training days and outdoor sessions.",
+  "Match Football": "Match-grade football built for grip, control, and consistent flight.",
+  "Studio Yoga Mat": "Non-slip studio mat with stable cushioning for daily practice.",
+  "Road Running Shoe": "Responsive road shoe tuned for tempo runs and long distances.",
+  "Insulated Bottle": "Double-wall insulated bottle that keeps drinks cold or hot for hours.",
+  "Team Jersey": "Breathable performance jersey for training and match-day wear.",
+  "Lounge Sofa": "Deep-seat lounge sofa upholstered for comfort and living-room presence.",
+  "Arc Floor Lamp": "Sculptural arc lamp that delivers soft ambient light with presence.",
+  "Dining Chair": "Ergonomic dining chair with a refined frame and lasting comfort.",
+  "Copper Cookware": "Professional copper cookware for even heat and polished kitchen style.",
+  "Linen Curtain": "Soft linen curtain panels that filter light with understated texture.",
+  "Wool Area Rug": "Hand-finished wool rug that anchors a room with quiet warmth.",
+  "Leather Tote": "Full-grain leather tote with clean lines and everyday capacity.",
+  "Heritage Chronograph": "Heritage chronograph with sapphire crystal and refined detailing.",
+  "Solitaire Ring": "Classic solitaire setting crafted for everyday elegance.",
+  "Silk Evening Suit": "Silk-blend evening suit tailored for formal occasions.",
+  "Signature Fragrance": "Signature fragrance with balanced top notes and a lasting dry-down.",
+  "Barista Coffee Set": "Home barista set for precise brewing and café-quality cups.",
+  "Gourmet Snack Box": "Curated snack assortment selected for sharing and gifting.",
+  "Porcelain Tea Set": "Porcelain tea service with a calm glaze and everyday durability.",
+  "Artisan Cookies": "Fresh-baked artisan cookies with a rich, bakery-quality finish.",
+  "Cold-Pressed Juice": "Cold-pressed juice blend prepared for clean flavor and freshness.",
+  "Butter Croissant": "Flaky butter croissant baked for a golden exterior and soft crumb.",
+  "Studio Headset": "Studio headset with clear audio and a comfortable long-session fit.",
+  "Pro Controller": "Precision controller tuned for responsive play and all-day comfort.",
+  "Mechanical Keyboard": "Mechanical keyboard with tactile switches and a durable build.",
+  "Next-Gen Console": "Next-generation console ready for high-fidelity games and media.",
+  "Precision Mouse": "High-precision mouse for accurate tracking and desk productivity.",
+  "Ergo Desk Chair": "Ergonomic desk chair designed for posture support through long workdays.",
 };
 
 const themes: Record<MallCategory, StoreNode["theme"]> = {
@@ -35,32 +143,31 @@ type FloorProgram = {
   stores: FloorStoreSpec[];
 };
 
-/** Floor category + matching subcategory store names */
 const floorPrograms: FloorProgram[] = [
   {
     title: "Ground Atrium",
-    categoryName: "Fashion & Food",
+    categoryName: "Fashion & Dining",
     stores: [
       { category: "fashion", subcategory: "Ready-to-Wear", name: "AURA Atelier" },
-      { category: "beauty", subcategory: "Beauty Studio", name: "LUMIÉ Glow" },
-      { category: "food", subcategory: "Café Court", name: "Café Atrium" },
-      { category: "fashion", subcategory: "Street Style", name: "Thread & Co" },
+      { category: "beauty", subcategory: "Beauty Studio", name: "Lumié Beauty" },
+      { category: "food", subcategory: "Café Court", name: "Atrium Café" },
+      { category: "fashion", subcategory: "Contemporary Style", name: "Thread & Co." },
       { category: "beauty", subcategory: "Fragrance Desk", name: "Bloom Lab" },
-      { category: "food", subcategory: "Sweet Counter", name: "Bites Court" },
-      { category: "fashion", subcategory: "Denim Lane", name: "Indigo Row" },
+      { category: "food", subcategory: "Confectionery", name: "Bites Court" },
+      { category: "fashion", subcategory: "Denim Collection", name: "Indigo Row" },
       { category: "luxury", subcategory: "Gift Boutique", name: "Maison Petit" },
     ],
   },
   {
     title: "Style Runway",
-    categoryName: "Style & Sport",
+    categoryName: "Apparel & Sport",
     stores: [
       { category: "fashion", subcategory: "Runway Edit", name: "AURA Runway" },
-      { category: "sports", subcategory: "Active Wear", name: "Velocity Gear" },
-      { category: "luxury", subcategory: "Premium Tailor", name: "Orélle House" },
-      { category: "fashion", subcategory: "Footwear Hub", name: "Step Form" },
-      { category: "sports", subcategory: "Training Zone", name: "Field Pro" },
-      { category: "beauty", subcategory: "Sport Beauty", name: "Glow Active" },
+      { category: "sports", subcategory: "Activewear", name: "Velocity Gear" },
+      { category: "luxury", subcategory: "Tailoring", name: "Orélle House" },
+      { category: "fashion", subcategory: "Footwear", name: "Step Form" },
+      { category: "sports", subcategory: "Training", name: "Field Pro" },
+      { category: "beauty", subcategory: "Active Beauty", name: "Glow Active" },
       { category: "luxury", subcategory: "Accessories", name: "Maison V" },
       { category: "fashion", subcategory: "Casual Wear", name: "Thread Daily" },
     ],
@@ -69,26 +176,26 @@ const floorPrograms: FloorProgram[] = [
     title: "Tech Pavilion",
     categoryName: "Electronics & Gaming",
     stores: [
-      { category: "electronics", subcategory: "Laptops", name: "Nextron Core" },
+      { category: "electronics", subcategory: "Computing", name: "Nextron Core" },
       { category: "gaming", subcategory: "Game Arena", name: "Neon Arena" },
-      { category: "electronics", subcategory: "Mobiles", name: "Pixel Bay" },
-      { category: "electronics", subcategory: "Audio Lab", name: "Sound Dock" },
+      { category: "electronics", subcategory: "Mobile", name: "Pixel Bay" },
+      { category: "electronics", subcategory: "Audio", name: "Sound Dock" },
       { category: "gaming", subcategory: "Controllers", name: "Level Up" },
-      { category: "electronics", subcategory: "Cameras", name: "Lens Bay" },
-      { category: "gaming", subcategory: "Esports Desk", name: "Arena Desk" },
-      { category: "electronics", subcategory: "Smart Home", name: "Nextron Home" },
+      { category: "electronics", subcategory: "Imaging", name: "Lens Bay" },
+      { category: "gaming", subcategory: "Esports", name: "Arena Desk" },
+      { category: "electronics", subcategory: "Connected Home", name: "Nextron Home" },
     ],
   },
   {
     title: "Living Loft",
-    categoryName: "Home Living",
+    categoryName: "Home & Interiors",
     stores: [
       { category: "home", subcategory: "Living Room", name: "Haven Lounge" },
       { category: "home", subcategory: "Lighting", name: "Nest Light" },
       { category: "home", subcategory: "Seating", name: "Form Chair" },
       { category: "home", subcategory: "Kitchen", name: "Cook Nest" },
       { category: "home", subcategory: "Textiles", name: "Curtain House" },
-      { category: "home", subcategory: "Rugs & Floors", name: "Rug Form" },
+      { category: "home", subcategory: "Floor Coverings", name: "Rug Form" },
       { category: "home", subcategory: "Decor", name: "Haven Decor" },
       { category: "home", subcategory: "Workspace", name: "Nest Desk" },
     ],
@@ -101,29 +208,31 @@ const floorPrograms: FloorProgram[] = [
       { category: "luxury", subcategory: "Fine Watches", name: "Maison Time" },
       { category: "luxury", subcategory: "Jewelry", name: "Diamond Row" },
       { category: "luxury", subcategory: "Couture", name: "Silk Salon" },
-      { category: "luxury", subcategory: "Signature Scent", name: "V Fragrance" },
-      { category: "beauty", subcategory: "Spa Beauty", name: "LUMIÉ Spa" },
-      { category: "luxury", subcategory: "Gift Salon", name: "Maison Gift" },
+      { category: "luxury", subcategory: "Fragrance", name: "V Fragrance" },
+      { category: "beauty", subcategory: "Spa Beauty", name: "Lumié Spa" },
+      { category: "luxury", subcategory: "Gifting", name: "Maison Gift" },
       { category: "fashion", subcategory: "Evening Wear", name: "AURA Evening" },
     ],
   },
   {
     title: "Play Court",
-    categoryName: "Food & Entertainment",
+    categoryName: "Dining & Entertainment",
     stores: [
-      { category: "food", subcategory: "Coffee Bar", name: "Café Court" },
+      { category: "food", subcategory: "Coffee Bar", name: "Court Café" },
       { category: "gaming", subcategory: "Console Zone", name: "Neon Play" },
       { category: "food", subcategory: "Snack Lane", name: "Bites Lane" },
-      { category: "fashion", subcategory: "Fan Merch", name: "Thread Fan" },
-      { category: "gaming", subcategory: "Headset Hub", name: "Level Audio" },
+      { category: "fashion", subcategory: "Lifestyle Merch", name: "Thread Fan" },
+      { category: "gaming", subcategory: "Audio Hub", name: "Level Audio" },
       { category: "food", subcategory: "Dessert Desk", name: "Sweet Atrium" },
-      { category: "electronics", subcategory: "Gadgets", name: "Pixel Fun" },
+      { category: "electronics", subcategory: "Gadgets", name: "Pixel Lab" },
       { category: "gaming", subcategory: "Esports Café", name: "Arena Café" },
     ],
   },
 ];
 
 const wings = ["north", "east", "south", "west", "plaza", "lane", "court", "gate"] as const;
+
+const finishes = ["Noir", "Ivory", "Slate", "Sand", "Ink", "Pearl"] as const;
 
 function createProducts(
   storeId: string,
@@ -136,20 +245,24 @@ function createProducts(
   return Array.from({ length: count }, (_, i) => {
     const id = `${storeId}-p-${i}`;
     const baseName = pool[i % pool.length];
-    const name = `${baseName} ${i + 1}`;
+    const finish = finishes[i % finishes.length];
+    const name = `${baseName} · ${finish}`;
+    const blurb = productBlurbs[baseName] ?? `${baseName} from the ${storeName} collection.`;
     return {
       id,
       name,
-      price: 999 + (i + 1) * 311,
-      rating: 4 + ((i % 10) * 0.08),
-      colors: ["Black", "White", "Blue"],
-      sizes: ["S", "M", "L", "XL"],
+      price: 1499 + (i + 1) * 350 + (category === "luxury" ? 4000 : 0),
+      rating: 4.2 + ((i % 8) * 0.1),
+      colors: ["Black", "Ivory", "Navy"],
+      sizes: category === "electronics" || category === "home" || category === "food"
+        ? ["One Size"]
+        : ["S", "M", "L", "XL"],
       shelfIndex: i,
       storeId,
       category,
       subcategory,
-      image: productImage(baseName, id),
-      description: `${name} from ${storeName} · ${subcategory} on this floor’s ${category} edit — premium finish, showroom-ready details.`,
+      image: productImage(baseName, id, category),
+      description: `${blurb} Available at ${storeName} in ${subcategory}.`,
     };
   });
 }
@@ -166,8 +279,8 @@ export const mallFloors: MallFloor[] = floorPrograms.map((program, level) => {
       floor: level,
       wing,
       theme: themes[spec.category],
-      doorImage: storeDoorImage(spec.subcategory, spec.category, id),
-      products: createProducts(id, spec.category, spec.subcategory, spec.name, 18),
+      doorImage: storeDoorImage(spec.name, spec.category, id),
+      products: createProducts(id, spec.category, spec.subcategory, spec.name, 12),
     };
   });
 

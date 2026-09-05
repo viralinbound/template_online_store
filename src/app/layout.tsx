@@ -15,8 +15,9 @@ const body = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "MegaMall — Landing & Floors",
-  description: "Website landing into endless floor pages, lobbies, and store showrooms",
+  title: "MegaMall — Premium Virtual Retail",
+  description:
+    "Explore professional floor destinations, curated store collections, and shop with secure account checkout.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

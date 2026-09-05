@@ -39,7 +39,7 @@ export function AmixStoreGallery({
   const introDone = progressUi > 0.1;
   const productProgress = Math.max(0, (progressUi - 0.12) / 0.88);
   const current = active >= 0 ? products[active] : null;
-  const sideLabel = active < 0 ? "" : active % 2 === 0 ? "Left product" : "Right product";
+  const sideLabel = active < 0 ? "" : active % 2 === 0 ? "Featured left" : "Featured right";
 
   useEffect(() => {
     const el = scroller.current;
@@ -95,7 +95,7 @@ export function AmixStoreGallery({
 
       <div className="amix3-sticky">
         <button type="button" className="amix3-back" onClick={onBack}>
-          ← Zoom out to lobby
+          ← Back to lobby
         </button>
 
         <motion.div
@@ -110,11 +110,11 @@ export function AmixStoreGallery({
           transition={{ type: "spring", stiffness: 130, damping: 18 }}
         >
           <p className="amix3-kicker">
-            Floor {floorLabel} · {store.subcategory} · {store.category}
+            Floor {floorLabel} · {store.subcategory}
           </p>
           <h2 className="amix3-store-name">{store.name}</h2>
           {titleMode && (
-            <span className="amix3-start">Scroll to reveal products · left, then right</span>
+            <span className="amix3-start">Scroll to browse the full collection</span>
           )}
         </motion.div>
 
@@ -188,10 +188,10 @@ export function AmixStoreGallery({
               <p className="amix3-price">₹{current.price.toLocaleString("en-IN")}</p>
               <div className="amix3-actions">
                 <button type="button" className="buy" onClick={() => onOpenProduct(current)}>
-                  View product
+                  View details
                 </button>
                 <button type="button" className="bag" onClick={() => onBuy(current)}>
-                  Add to bag
+                  Add to cart
                 </button>
                 <button type="button" className="bag" onClick={() => onBuyNow(current)}>
                   Buy now
@@ -206,10 +206,10 @@ export function AmixStoreGallery({
         </div>
         <p className="amix3-hint">
           {titleMode
-            ? "Scroll into the showroom"
+            ? "Scroll to explore products"
             : active % 2 === 0
-              ? "Product on LEFT · details on right"
-              : "Product on RIGHT · details on left"}
+              ? "Product left · details right"
+              : "Product right · details left"}
         </p>
       </div>
     </section>

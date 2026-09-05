@@ -104,11 +104,11 @@ export const useMallStore = create<MallState>()(
         const e = email.trim().toLowerCase();
         const p = password.trim();
         if (!n || !e || p.length < 4) {
-          set({ authError: "Name, email, and password (4+ chars) required." });
+          set({ authError: "Please enter your name, email, and a password (minimum 4 characters)." });
           return false;
         }
         if (get().users.some((u) => u.email === e)) {
-          set({ authError: "Email already registered. Please log in." });
+          set({ authError: "This email is already registered. Please sign in." });
           return false;
         }
         const user: MallUser = {
@@ -129,7 +129,7 @@ export const useMallStore = create<MallState>()(
         const e = email.trim().toLowerCase();
         const user = get().users.find((u) => u.email === e && u.password === password.trim());
         if (!user) {
-          set({ authError: "Invalid email or password." });
+          set({ authError: "Incorrect email or password." });
           return false;
         }
         set({ session: publicUser(user), showAuth: false, authError: null });
@@ -139,14 +139,14 @@ export const useMallStore = create<MallState>()(
       placeOrder: (customerName, address) => {
         const { session, bag } = get();
         if (!session) {
-          set({ showAuth: true, authMode: "login", authError: "Log in to place an order." });
+          set({ showAuth: true, authMode: "login", authError: "Please sign in to place an order." });
           return false;
         }
         if (!bag.length) return false;
         const name = customerName.trim() || session.name;
         const addr = address.trim();
         if (!addr) {
-          set({ authError: "Address is required." });
+          set({ authError: "Please enter a delivery address." });
           return false;
         }
         const order: MallOrder = {

@@ -168,7 +168,7 @@ export function VirtualMallExperience() {
     if (idx !== floor) setFloor(idx);
     void runZoom(
       pic ?? page.hero,
-      `Entering Floor ${page.label} lobby`,
+      `Opening ${page.title}`,
       () => {
         setPhase("lobby");
         setLobbyKey((k) => k + 1);
@@ -180,7 +180,7 @@ export function VirtualMallExperience() {
   const zoomOutToFloors = () => {
     void runZoom(
       current.hero,
-      `Back to Floor ${current.label} landing`,
+      `Returning to ${current.title}`,
       () => {
         setPhase("floors");
         setStore(null);
@@ -193,7 +193,7 @@ export function VirtualMallExperience() {
   const openStore = (s: StoreNode) => {
     void runZoom(
       s.doorImage,
-      `${s.name} · Floor ${current.label}`,
+      `${s.name} · ${s.subcategory}`,
       () => {
         setStore(s);
         setProduct(null);
@@ -206,7 +206,7 @@ export function VirtualMallExperience() {
   const zoomOutToLobby = () => {
     void runZoom(
       store?.doorImage ?? current.hero,
-      `Floor ${current.label} lobby`,
+      `${current.title} lobby`,
       () => {
         setStore(null);
         setProduct(null);
@@ -220,7 +220,7 @@ export function VirtualMallExperience() {
   const openProduct = (p: Product) => {
     void runZoom(
       p.image,
-      `${p.name} · Floor ${current.label}`,
+      p.name,
       () => {
         setProduct(p);
         setPhase("product");
@@ -232,7 +232,7 @@ export function VirtualMallExperience() {
   const zoomOutToStore = () => {
     void runZoom(
       product?.image ?? current.hero,
-      `${store?.name ?? "Store"} · Floor ${current.label}`,
+      store?.name ?? "Collection",
       () => {
         setProduct(null);
         setPhase("store");
@@ -286,7 +286,7 @@ export function VirtualMallExperience() {
               )}
               {phase === "lobby" && (
                 <button type="button" onClick={zoomOutToFloors}>
-                  ← Landing floors
+                  ← Floors
                 </button>
               )}
               {liveSession ? (
@@ -295,16 +295,16 @@ export function VirtualMallExperience() {
                     Orders ({myOrders.length})
                   </button>
                   <button type="button" onClick={logout} title={liveSession.email}>
-                    {liveSession.name.split(" ")[0]} · Out
+                    {liveSession.name.split(" ")[0]}
                   </button>
                 </>
               ) : (
                 <>
                   <button type="button" onClick={() => setShowAuth(true, "login")}>
-                    Log in
+                    Sign in
                   </button>
                   <button type="button" onClick={() => setShowAuth(true, "signup")}>
-                    Sign up
+                    Create account
                   </button>
                 </>
               )}
@@ -315,7 +315,7 @@ export function VirtualMallExperience() {
                 animate={{ scale: [1, 1.1, 1] }}
                 onClick={() => setShowBag(true)}
               >
-                Bag {bag.length}
+                Cart {bag.length}
               </motion.button>
             </div>
           </header>
@@ -410,7 +410,7 @@ export function VirtualMallExperience() {
                     <strong className="mp-zoom-floor">Floor {zoomFloorLabel}</strong>
                   )}
                   <p>{zoomLabel}</p>
-                  <span>{zoomDir === "in" ? "Zooming in…" : "Zooming out…"}</span>
+                  <span>{zoomDir === "in" ? "Opening…" : "Returning…"}</span>
                 </motion.div>
               </motion.div>
             )}
@@ -434,7 +434,7 @@ export function VirtualMallExperience() {
                   setInspect(null);
                 }}
               >
-                Add to bag
+                Add to cart
               </button>
               <button
                 type="button"
@@ -454,14 +454,14 @@ export function VirtualMallExperience() {
       <AnimatePresence>
         {showBag && (
           <Overlay onClose={() => setShowBag(false)}>
-            <h3>Bag</h3>
+            <h3>Shopping cart</h3>
             {bag.length === 0 ? (
-              <p className="muted">Empty</p>
+              <p className="muted">Your cart is empty.</p>
             ) : (
               bag.map((item) => (
                 <div key={item.id} className="bag-line">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.image} alt="" />
+                  <img src={item.image} alt={item.name} />
                   <span>{item.name}</span>
                   <span>₹{item.price.toLocaleString("en-IN")}</span>
                 </div>
@@ -481,7 +481,7 @@ export function VirtualMallExperience() {
                 setCheckout(true);
               }}
             >
-              {liveSession ? "Checkout" : "Log in to checkout"}
+              {liveSession ? "Proceed to checkout" : "Sign in to checkout"}
             </button>
           </Overlay>
         )}
@@ -492,7 +492,7 @@ export function VirtualMallExperience() {
           <Overlay onClose={() => setCheckout(false)}>
             <h3>Checkout</h3>
             {!liveSession ? (
-              <p className="muted">Please log in or sign up to place an order.</p>
+              <p className="muted">Please sign in or create an account to complete your order.</p>
             ) : (
               <>
                 <label>
@@ -549,7 +549,7 @@ export function VirtualMallExperience() {
           <Overlay onClose={() => setShowOrders(false)}>
             <h3>Order history</h3>
             {!liveSession ? (
-              <p className="muted">Log in to see your orders.</p>
+              <p className="muted">Sign in to view your order history.</p>
             ) : myOrders.length === 0 ? (
               <p className="muted">No orders yet.</p>
             ) : (
@@ -621,7 +621,7 @@ function Intro({
       <motion.img
         className="lp-hero-img"
         src={landingHeroImage()}
-        alt=""
+        alt="MegaMall premium retail destination"
         initial={{ scale: 1.12 }}
         animate={{ scale: 1 }}
         transition={{ duration: 2.4, ease: [0.22, 1, 0.36, 1] }}
@@ -643,15 +643,15 @@ function Intro({
           ) : (
             <>
               <button type="button" onClick={() => onAuth("login")}>
-                Log in
+                Sign in
               </button>
               <button type="button" onClick={() => onAuth("signup")}>
-                Sign up
+                Create account
               </button>
             </>
           )}
           <button type="button" onClick={onBag}>
-            Bag ({bagCount})
+            Cart ({bagCount})
           </button>
         </div>
       </header>
@@ -663,7 +663,7 @@ function Intro({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          Virtual shopping destination
+          Premium retail destination
         </motion.p>
         <motion.h1
           initial={{ opacity: 0, y: 28 }}
@@ -678,7 +678,7 @@ function Intro({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
         >
-          Scroll the floors. Step into lobbies. Shop the showrooms.
+          A curated retail destination — browse floors, open stores, and shop featured collections.
         </motion.p>
         <motion.div
           className="lp-cta"
@@ -687,7 +687,7 @@ function Intro({
           transition={{ delay: 0.48 }}
         >
           <button type="button" className="primary" onClick={onEnter}>
-            Enter the mall
+            Begin shopping
           </button>
         </motion.div>
       </div>
@@ -699,7 +699,7 @@ function Intro({
         transition={{ delay: 0.9 }}
         aria-hidden
       >
-        <span>Scroll floors after enter</span>
+        <span>Continue to floors</span>
         <i />
       </motion.div>
     </section>
@@ -735,7 +735,7 @@ function ProductPage({
       transition={{ duration: 0.45 }}
     >
       <button type="button" className="pp-back" onClick={onBack}>
-        ← Zoom out to store
+        ← Back to collection
       </button>
       <div className="pp-hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -768,10 +768,10 @@ function ProductPage({
         <p className="pp-price">₹{product.price.toLocaleString("en-IN")}</p>
         <div className="pp-actions">
           <button type="button" className="primary" onClick={onBuyNow}>
-            Buy product
+            Buy now
           </button>
           <button type="button" onClick={onBuy}>
-            Add to bag
+            Add to cart
           </button>
         </div>
       </div>
@@ -872,7 +872,7 @@ function FloorScroll({
       </div>
 
       <div className="fl-endless-hint">
-        <span>Scroll floors ↑↓</span>
+        <span>Browse floors</span>
       </div>
 
       <div className="mp-floor-dots fl-land-dots">
@@ -905,14 +905,14 @@ function FloorSlide({
       <button
         type="button"
         className="fl-land-hit"
-        aria-label={`Zoom into Floor ${page.label}`}
+        aria-label={`Open ${page.title}`}
         onClick={() => onEnterLobby(page.hero)}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <motion.img
           className="fl-land-hero"
           src={page.hero}
-          alt=""
+          alt={page.title}
           initial={{ scale: 1.1 }}
           whileInView={{ scale: 1 }}
           viewport={{ amount: 0.4, once: false }}
@@ -928,7 +928,7 @@ function FloorSlide({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ amount: 0.5, once: false }}
         >
-          MegaMall
+          MegaMall · Floor {page.label}
         </motion.p>
         <motion.h1
           initial={{ opacity: 0, y: 32 }}
@@ -945,7 +945,7 @@ function FloorSlide({
           viewport={{ amount: 0.5, once: false }}
           transition={{ delay: 0.05 }}
         >
-          Floor {page.label} · {page.categoryName}. Tap a subcategory in the lobby after you zoom in.
+          {page.categoryName} — curated boutiques and featured collections on this level.
         </motion.p>
         <motion.ul
           className="fl-land-subs"
@@ -966,7 +966,7 @@ function FloorSlide({
           transition={{ delay: 0.12 }}
         >
           <button type="button" className="primary" onClick={() => onEnterLobby(page.hero)}>
-            Zoom into {page.title}
+            Explore {page.title}
           </button>
         </motion.div>
       </div>
@@ -978,7 +978,7 @@ function FloorSlide({
         viewport={{ amount: 0.4, once: false }}
         aria-hidden
       >
-        <span>Scroll for next floor</span>
+        <span>Next floor</span>
         <i />
       </motion.div>
     </article>
@@ -1037,17 +1037,17 @@ function FloorLobby({
             Floor {page.label} · {page.categoryName}
           </p>
           <h2>{page.title}</h2>
-          <span>Click a subcategory, then open a matching store</span>
+          <span>Select a department, then open a store</span>
         </motion.div>
       </div>
 
-      <div className="fl-sub-rail" role="tablist" aria-label="Subcategories">
+      <div className="fl-sub-rail" role="tablist" aria-label="Departments">
         <button
           type="button"
           className={activeSub === "All" ? "on" : ""}
           onClick={() => setActiveSub("All")}
         >
-          All · {page.categoryName}
+          All departments
         </button>
         {page.subcategories.map((sub) => (
           <button
@@ -1095,7 +1095,7 @@ function FloorLobby({
                   <span>
                     {page.categoryName} · {s.category}
                   </span>
-                  <small>Enter showroom</small>
+                  <small>View collection</small>
                 </div>
               </motion.button>
             );
@@ -1127,11 +1127,11 @@ function AuthOverlay({
 
   return (
     <Overlay onClose={onClose}>
-      <h3>{mode === "login" ? "Log in" : "Sign up"}</h3>
+      <h3>{mode === "login" ? "Sign in" : "Create account"}</h3>
       <p className="muted">
         {mode === "login"
-          ? "Welcome back — access checkout and order history."
-          : "Create an account to save orders."}
+          ? "Sign in to checkout and view your order history."
+          : "Create an account to save purchases and track orders."}
       </p>
       {mode === "signup" && (
         <label>
@@ -1166,14 +1166,14 @@ function AuthOverlay({
           else onSignup(name, email, password);
         }}
       >
-        {mode === "login" ? "Log in" : "Create account"}
+        {mode === "login" ? "Sign in" : "Create account"}
       </button>
       <button
         type="button"
         className="auth-switch"
         onClick={() => onSwitch(mode === "login" ? "signup" : "login")}
       >
-        {mode === "login" ? "Need an account? Sign up" : "Have an account? Log in"}
+        {mode === "login" ? "New here? Create an account" : "Already registered? Sign in"}
       </button>
     </Overlay>
   );

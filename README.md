@@ -1,6 +1,6 @@
-# template_online_store
+# MegaMall — template_online_store
 
-MegaMall — animated online store template with floor landings, lobby subcategories, store showrooms, product pages, signup/login, and order history.
+Premium virtual retail experience with curated floors, professional product photography, store collections, account checkout, and order history.
 
 ## Getting Started
 
@@ -18,4 +18,4 @@ Open [http://localhost:3000](http://localhost:3000).
 - Tailwind CSS
 - Framer Motion
 - Three.js / React Three Fiber
-- Zustand (auth, bag, orders)
+- Zustand (auth, cart, orders)
