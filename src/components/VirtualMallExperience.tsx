@@ -357,8 +357,8 @@ export function VirtualMallExperience() {
                 onOpenStore={openStore}
               />
             ) : (
-              <EndlessFloorScroll
-                key="floors-endless"
+              <FloorScroll
+                key="floors-scroll"
                 pages={pages}
                 floor={floor}
                 onFloorChange={setFloor}
@@ -779,7 +779,7 @@ function ProductPage({
   );
 }
 
-function EndlessFloorScroll({
+function FloorScroll({
   pages,
   floor,
   onFloorChange,
@@ -791,67 +791,62 @@ function EndlessFloorScroll({
   onEnterLobby: (floorIndex: number, pic?: string) => void;
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const n = pages.length;
-  const loop = useMemo(() => [...pages, ...pages, ...pages], [pages]);
   const locking = useRef(false);
   const lastFloor = useRef(floor);
-  const ready = useRef(false);
+  const slideRefs = useRef<(HTMLElement | null)[]>([]);
 
+  // Jump when floor dots change
   useEffect(() => {
     const el = scrollerRef.current;
-    if (!el) return;
-    const place = () => {
-      const h = el.clientHeight || window.innerHeight;
-      el.scrollTop = (n + floor) * h;
-      ready.current = true;
-    };
-    place();
-    requestAnimationFrame(place);
-  }, [n]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el || !ready.current || locking.current) return;
+    const slide = slideRefs.current[floor];
+    if (!el || !slide || locking.current) return;
     if (lastFloor.current === floor) return;
     lastFloor.current = floor;
-    const h = el.clientHeight || window.innerHeight;
     locking.current = true;
-    el.scrollTo({ top: (n + floor) * h, behavior: "smooth" });
+    slide.scrollIntoView({ behavior: "smooth", block: "start" });
     window.setTimeout(() => {
       locking.current = false;
-    }, 550);
-  }, [floor, n]);
+    }, 600);
+  }, [floor]);
 
-  const onScroll = () => {
-    const el = scrollerRef.current;
-    if (!el || locking.current || !ready.current) return;
-    const h = el.clientHeight;
-    if (h <= 0) return;
+  // Track which floor is in view while scrolling (stops at ends — no loop)
+  useEffect(() => {
+    const root = scrollerRef.current;
+    if (!root) return;
 
-    let idx = Math.round(el.scrollTop / h);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (locking.current) return;
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visible) return;
+        const idx = Number((visible.target as HTMLElement).dataset.floorIndex);
+        if (Number.isNaN(idx) || idx === lastFloor.current) return;
+        lastFloor.current = idx;
+        onFloorChange(idx);
+      },
+      { root, threshold: [0.55, 0.7, 0.85] },
+    );
 
-    if (idx < n) {
-      locking.current = true;
-      el.scrollTop += n * h;
-      idx += n;
-      requestAnimationFrame(() => {
-        locking.current = false;
-      });
-    } else if (idx >= n * 2) {
-      locking.current = true;
-      el.scrollTop -= n * h;
-      idx -= n;
-      requestAnimationFrame(() => {
-        locking.current = false;
-      });
-    }
+    slideRefs.current.forEach((node) => {
+      if (node) observer.observe(node);
+    });
 
-    const real = ((idx % n) + n) % n;
-    if (real !== lastFloor.current) {
-      lastFloor.current = real;
-      onFloorChange(real);
-    }
-  };
+    return () => observer.disconnect();
+  }, [pages.length, onFloorChange]);
+
+  // Start on current floor once
+  useEffect(() => {
+    const slide = slideRefs.current[floor];
+    if (!slide) return;
+    locking.current = true;
+    slide.scrollIntoView({ behavior: "auto", block: "start" });
+    lastFloor.current = floor;
+    requestAnimationFrame(() => {
+      locking.current = false;
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <motion.section
@@ -861,13 +856,18 @@ function EndlessFloorScroll({
       exit={{ opacity: 0, scale: 1.04, filter: "blur(10px)" }}
       transition={{ duration: 0.45 }}
     >
-      <div ref={scrollerRef} className="fl-endless-scroller" onScroll={onScroll}>
-        {loop.map((page, i) => (
-          <FloorSlide
-            key={`${page.level}-${i}`}
-            page={page}
-            onEnterLobby={(pic) => onEnterLobby(i % n, pic)}
-          />
+      <div ref={scrollerRef} className="fl-endless-scroller">
+        {pages.map((page, i) => (
+          <div
+            key={page.level}
+            className="fl-land-wrap"
+            data-floor-index={i}
+            ref={(node) => {
+              slideRefs.current[i] = node;
+            }}
+          >
+            <FloorSlide page={page} onEnterLobby={(pic) => onEnterLobby(i, pic)} />
+          </div>
         ))}
       </div>
 
