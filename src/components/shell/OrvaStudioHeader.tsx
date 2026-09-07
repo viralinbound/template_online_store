@@ -103,13 +103,13 @@ export function OrvaStudioHeader({
                 {sessionName}
               </span>
               {onSignOut && (
-                <button type="button" className="orva-studio-quiet" onClick={onSignOut}>
+                <button type="button" className="orva-studio-quiet orva-studio-auth" onClick={onSignOut}>
                   Sign out
                 </button>
               )}
             </>
           ) : (
-            <button type="button" className="orva-studio-quiet" onClick={onSignIn}>
+            <button type="button" className="orva-studio-quiet orva-studio-auth" onClick={onSignIn}>
               Sign in
             </button>
           )}
@@ -198,6 +198,25 @@ export function OrvaStudioHeader({
                   >
                     <strong>Sign in</strong>
                     <span>Account · admin demo</span>
+                  </button>
+                </motion.div>
+              )}
+              {sessionName && onSignOut && (
+                <motion.div
+                  initial={reduce ? false : { opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.24 }}
+                >
+                  <button
+                    type="button"
+                    className="orva-studio-panel-auth"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onSignOut();
+                    }}
+                  >
+                    <strong>Sign out</strong>
+                    <span>{sessionName} · log out</span>
                   </button>
                 </motion.div>
               )}
