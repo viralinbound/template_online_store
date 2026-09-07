@@ -8566,6 +8566,10 @@ button.danger {
   font: inherit;
 }
 
+.admin-side-brand:hover strong {
+  color: #fff;
+}
+
 .admin-side-brand strong {
   font-family: var(--font-display), sans-serif;
   font-size: 1.25rem;
@@ -8788,6 +8792,12 @@ button.danger {
     cursor: pointer;
     font: inherit;
     min-width: 0;
+    text-decoration: none;
+  }
+
+  .admin-mobile-brand:hover strong,
+  .admin-mobile-brand:focus-visible strong {
+    color: #fff;
   }
 
   .admin-mobile-brand strong {
