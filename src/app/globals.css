@@ -11769,6 +11769,15 @@ button.danger {
   .orva-studio-quiet {
     display: none;
   }
+
+  .orva-studio-quiet.orva-studio-auth {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
 }
 
 @media (max-width: 640px) {
