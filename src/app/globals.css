@@ -1958,17 +1958,37 @@ html {
     display: none;
   }
 
-  .mp-nav-orders {
+  .mp-nav-actions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 0.15rem;
+  }
+
+  .mp-nav-actions::-webkit-scrollbar {
     display: none;
   }
 
   .mp-nav-actions button {
     padding: 0.42rem 0.7rem;
     font-size: 0.78rem;
+    flex: 0 0 auto;
   }
 
   .lp-top strong {
     font-size: 1rem;
+  }
+
+  .lp-top-actions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 70vw;
+    scrollbar-width: none;
+  }
+
+  .lp-top-actions::-webkit-scrollbar {
+    display: none;
   }
 
   .lp-copy {
@@ -1997,6 +2017,16 @@ html {
 
   .fl-lobby-hero > div {
     padding: 1.1rem 1rem;
+  }
+
+  .fl-sub-rail {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    background: color-mix(in srgb, var(--bg, #f3f7f7) 88%, transparent);
+    backdrop-filter: blur(10px);
+    padding-top: 0.35rem;
+    padding-bottom: 0.65rem;
   }
 
   .amix3-title.hero {
@@ -2036,6 +2066,7 @@ html {
   .mp-floor-dots button {
     padding: 0.45rem 0.75rem;
     font-size: 0.78rem;
+    min-width: 2.6rem;
   }
 }
 
@@ -2052,6 +2083,14 @@ html {
   .lp-copy h1,
   .fl-land-copy h1 {
     font-size: clamp(2.35rem, 14vw, 3.4rem);
+  }
+
+  .amix-m-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .amix-m-actions .bag:last-child {
+    grid-column: 1 / -1;
   }
 }
 
@@ -2101,5 +2140,240 @@ html {
     border-left: 1px solid var(--line);
     box-shadow: none;
     padding: 4.5rem 1.25rem 1.5rem;
+  }
+}
+
+/* ========== Mobile / tablet store catalog ========== */
+/* ========== Mobile / tablet store catalog ========== */
+.amix-m {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--store-wall, #d9ecec) 55%, white), var(--store-bg, #eef7f6));
+  color: var(--store-ink, #123c3d);
+  padding: max(4.35rem, calc(env(safe-area-inset-top) + 3.5rem)) 0
+    max(1.25rem, env(safe-area-inset-bottom));
+}
+
+.amix-m-boot {
+  display: grid;
+  place-items: center;
+  color: var(--store-ink, #123c3d);
+  font-weight: 600;
+}
+
+.amix-m-boot p {
+  margin: 0;
+  opacity: 0.65;
+}
+
+.amix-m-top {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.55rem 1rem 0.75rem;
+  background: color-mix(in srgb, var(--store-bg, #eef7f6) 82%, white);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(13, 42, 44, 0.08);
+}
+
+.amix-m-back {
+  flex: 0 0 auto;
+  border: 1px solid rgba(13, 42, 44, 0.12);
+  background: white;
+  color: var(--store-ink, #0f3d40);
+  border-radius: 999px;
+  padding: 0.55rem 0.95rem;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: var(--shadow-soft);
+  touch-action: manipulation;
+}
+
+.amix-m-brand {
+  min-width: 0;
+  flex: 1;
+}
+
+.amix-m-brand p {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--store-accent, #14999c);
+}
+
+.amix-m-brand h2 {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.25rem, 5vw, 1.7rem);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.amix-m-count {
+  margin: 0.85rem 1rem 0.55rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.amix-m-list {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.35rem 1rem 1.5rem;
+}
+
+.amix-m-card {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(13, 42, 44, 0.08);
+  border-radius: 1.1rem;
+  padding: 0.7rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.amix-m-media {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background: #e8f0ef;
+  cursor: pointer;
+  aspect-ratio: 4 / 5;
+  touch-action: manipulation;
+}
+
+.amix-m-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.amix-m-body {
+  display: grid;
+  gap: 0.45rem;
+  align-content: start;
+  min-width: 0;
+}
+
+.amix-m-title {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  display: grid;
+  gap: 0.25rem;
+  touch-action: manipulation;
+}
+
+.amix-m-title strong {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.02rem;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.amix-m-title span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.amix-m-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.amix-m-meta em {
+  font-style: normal;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--store-accent, #14999c);
+}
+
+.amix-m-meta b {
+  font-size: 1.05rem;
+  color: var(--store-ink, #0f3d40);
+}
+
+.amix-m-actions {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 0.35rem;
+}
+
+.amix-m-actions button {
+  min-height: 42px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  touch-action: manipulation;
+}
+
+.amix-m-actions .buy {
+  border: 0;
+  color: #f4fffe;
+  background: linear-gradient(120deg, var(--store-ink, #0f3d40), var(--store-accent, #14999c));
+  padding: 0.55rem 0.8rem;
+}
+
+.amix-m-actions .bag {
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--store-ink, #0f3d40);
+  padding: 0.55rem 0.55rem;
+}
+
+@media (min-width: 700px) and (max-width: 1024px) {
+  .amix-m-list {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 0.5rem 1.15rem 1.75rem;
+  }
+
+  .amix-m-card {
+    grid-template-columns: 1fr;
+    padding: 0.85rem;
+  }
+
+  .amix-m-media {
+    aspect-ratio: 1 / 1.15;
+    max-height: 240px;
+  }
+
+  .amix-m-actions {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@media (hover: none) {
+  .fl-door:hover {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .mp-shop:hover .mp-shop-media img {
+    transform: none;
   }
 }

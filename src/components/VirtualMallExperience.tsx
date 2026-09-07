@@ -292,7 +292,7 @@ export function VirtualMallExperience() {
               {liveSession ? (
                 <>
                   <button type="button" className="mp-nav-orders" onClick={() => setShowOrders(true)}>
-                    Orders ({myOrders.length})
+                    Orders{myOrders.length > 0 ? ` (${myOrders.length})` : ""}
                   </button>
                   <button type="button" onClick={logout} title={liveSession.email}>
                     {liveSession.name.split(" ")[0]}
@@ -308,7 +308,7 @@ export function VirtualMallExperience() {
                     className="mp-nav-signup"
                     onClick={() => setShowAuth(true, "signup")}
                   >
-                    Create account
+                    Join
                   </button>
                 </>
               )}
@@ -650,7 +650,7 @@ function Intro({
                 Sign in
               </button>
               <button type="button" className="mp-nav-signup" onClick={() => onAuth("signup")}>
-                Create account
+                Join
               </button>
             </>
           )}
@@ -1041,7 +1041,7 @@ function FloorLobby({
             Floor {page.label} · {page.categoryName}
           </p>
           <h2>{page.title}</h2>
-          <span>Select a department, then open a store</span>
+          <span>Tap a store to browse products</span>
         </motion.div>
       </div>
 
@@ -1077,15 +1077,13 @@ function FloorLobby({
                 className={`fl-door fl-door-stack ${fromLeft ? "left" : "right"}`}
                 initial={{
                   opacity: 0,
-                  x: fromLeft ? -140 : 140,
-                  y: 48,
-                  rotate: fromLeft ? -5 : 5,
-                  scale: 0.92,
+                  y: 28,
+                  scale: 0.96,
                 }}
-                animate={{ opacity: 1, x: 0, y: 0, rotate: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.94 }}
-                transition={{ type: "spring", stiffness: 110, damping: 16 }}
-                whileHover={{ y: -10, scale: 1.03 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 140, damping: 18 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onOpenStore(s)}
               >
                 <div className="fl-door-media">

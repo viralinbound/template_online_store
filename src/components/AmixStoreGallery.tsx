@@ -26,23 +26,7 @@ export function AmixStoreGallery({
   onBuy,
   onBuyNow,
 }: Props) {
-  const products = store.products;
-  const [active, setActive] = useState(-1);
-  const progress = useRef(0);
-  const [progressUi, setProgressUi] = useState(0);
-  const scroller = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  const [compact, setCompact] = useState(false);
-
-  // first product LEFT (big), then RIGHT, then LEFT…
-  const sides = useMemo(() => products.map((_, i) => (i % 2 === 0 ? -1 : 1)), [products]);
-  const theme = store.theme;
-  const titleMode = progressUi < 0.12;
-  const introDone = progressUi > 0.1;
-  const productProgress = Math.max(0, (progressUi - 0.12) / 0.88);
-  const current = active >= 0 ? products[active] : null;
-  const sideLabel =
-    active < 0 ? "" : compact ? "Featured" : active % 2 === 0 ? "Featured left" : "Featured right";
+  const [compact, setCompact] = useState<boolean | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1024px)");
@@ -52,9 +36,152 @@ export function AmixStoreGallery({
     return () => mq.removeEventListener("change", apply);
   }, []);
 
+  if (compact === null) {
+    return (
+      <section
+        className="amix-m amix-m-boot"
+        style={{
+          ["--store-bg" as string]: store.theme.floor,
+          ["--store-ink" as string]: store.theme.primary,
+        }}
+        aria-busy
+      >
+        <p>Loading collection…</p>
+      </section>
+    );
+  }
+
+  if (compact) {
+    return (
+      <MobileStoreBrowse
+        store={store}
+        floorLabel={floorLabel}
+        accent={accent}
+        onBack={onBack}
+        onOpenProduct={onOpenProduct}
+        onBuy={onBuy}
+        onBuyNow={onBuyNow}
+      />
+    );
+  }
+
+  return (
+    <DesktopStoreGallery
+      store={store}
+      floorLabel={floorLabel}
+      accent={accent}
+      onBack={onBack}
+      onOpenProduct={onOpenProduct}
+      onBuy={onBuy}
+      onBuyNow={onBuyNow}
+    />
+  );
+}
+
+/** Touch-first catalog for phones and tablets */
+function MobileStoreBrowse({
+  store,
+  floorLabel,
+  accent,
+  onBack,
+  onOpenProduct,
+  onBuy,
+  onBuyNow,
+}: Props) {
+  const theme = store.theme;
+  const products = store.products;
+
+  return (
+    <section
+      className="amix-m"
+      style={{
+        ["--a" as string]: accent,
+        ["--store-bg" as string]: theme.floor,
+        ["--store-wall" as string]: theme.wall,
+        ["--store-ink" as string]: theme.primary,
+        ["--store-accent" as string]: theme.accent,
+      }}
+    >
+      <header className="amix-m-top">
+        <button type="button" className="amix-m-back" onClick={onBack}>
+          ← Lobby
+        </button>
+        <div className="amix-m-brand">
+          <p>
+            Floor {floorLabel} · {store.subcategory}
+          </p>
+          <h2>{store.name}</h2>
+        </div>
+      </header>
+
+      <p className="amix-m-count">{products.length} products in this collection</p>
+
+      <div className="amix-m-list">
+        {products.map((p, i) => (
+          <motion.article
+            key={p.id}
+            className="amix-m-card"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: Math.min(i * 0.04, 0.28), duration: 0.35 }}
+          >
+            <button type="button" className="amix-m-media" onClick={() => onOpenProduct(p)}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.image} alt={p.name} loading="lazy" />
+            </button>
+            <div className="amix-m-body">
+              <button type="button" className="amix-m-title" onClick={() => onOpenProduct(p)}>
+                <strong>{p.name}</strong>
+                <span>{p.description}</span>
+              </button>
+              <div className="amix-m-meta">
+                <em>★ {p.rating.toFixed(1)}</em>
+                <b>₹{p.price.toLocaleString("en-IN")}</b>
+              </div>
+              <div className="amix-m-actions">
+                <button type="button" className="buy" onClick={() => onOpenProduct(p)}>
+                  View
+                </button>
+                <button type="button" className="bag" onClick={() => onBuy(p)}>
+                  Add to cart
+                </button>
+                <button type="button" className="bag" onClick={() => onBuyNow(p)}>
+                  Buy now
+                </button>
+              </div>
+            </div>
+          </motion.article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DesktopStoreGallery({
+  store,
+  floorLabel,
+  accent,
+  onBack,
+  onOpenProduct,
+  onBuy,
+  onBuyNow,
+}: Props) {
+  const products = store.products;
+  const [active, setActive] = useState(-1);
+  const progress = useRef(0);
+  const [progressUi, setProgressUi] = useState(0);
+  const scroller = useRef<HTMLDivElement>(null);
+
+  const sides = useMemo(() => products.map((_, i) => (i % 2 === 0 ? -1 : 1)), [products]);
+  const theme = store.theme;
+  const titleMode = progressUi < 0.12;
+  const introDone = progressUi > 0.1;
+  const productProgress = Math.max(0, (progressUi - 0.12) / 0.88);
+  const current = active >= 0 ? products[active] : null;
+  const sideLabel = active < 0 ? "" : active % 2 === 0 ? "Featured left" : "Featured right";
+
   useEffect(() => {
     const el = scroller.current;
-    const sticky = stickyRef.current;
     if (!el) return;
     const onScroll = () => {
       const max = el.scrollHeight - el.clientHeight;
@@ -73,25 +200,12 @@ export function AmixStoreGallery({
       e.preventDefault();
       el.scrollTop += e.deltaY;
     };
-    let lastY = 0;
-    const onTouchStart = (e: TouchEvent) => {
-      lastY = e.touches[0]?.clientY ?? 0;
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      const y = e.touches[0]?.clientY ?? lastY;
-      el.scrollTop += lastY - y;
-      lastY = y;
-    };
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", onWheel, { passive: false });
-    sticky?.addEventListener("touchstart", onTouchStart, { passive: true });
-    sticky?.addEventListener("touchmove", onTouchMove, { passive: true });
     onScroll();
     return () => {
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", onWheel);
-      sticky?.removeEventListener("touchstart", onTouchStart);
-      sticky?.removeEventListener("touchmove", onTouchMove);
     };
   }, [products.length]);
 
@@ -105,7 +219,7 @@ export function AmixStoreGallery({
 
   return (
     <section
-      className={`amix3 amix3-light ${compact ? "amix3-compact" : ""}`}
+      className="amix3 amix3-light"
       style={{
         ["--a" as string]: accent,
         ["--store-bg" as string]: theme.floor,
@@ -118,7 +232,7 @@ export function AmixStoreGallery({
         <div className="amix3-spacer" style={{ height: `${(2 + products.length) * 95}vh` }} />
       </div>
 
-      <div className="amix3-sticky" ref={stickyRef}>
+      <div className="amix3-sticky">
         <button type="button" className="amix3-back" onClick={onBack}>
           <span className="amix3-back-full">← Back to lobby</span>
           <span className="amix3-back-short">← Lobby</span>
@@ -127,11 +241,11 @@ export function AmixStoreGallery({
         <motion.div
           className={`amix3-title ${titleMode ? "hero" : "dock"}`}
           animate={{
-            top: titleMode ? "48%" : compact ? "4.35rem" : "4.55rem",
-            left: titleMode ? "50%" : "1rem",
+            top: titleMode ? "50%" : "4.55rem",
+            left: titleMode ? "50%" : "1.1rem",
             x: titleMode ? "-50%" : "0%",
             y: titleMode ? "-50%" : "0%",
-            scale: titleMode ? 1 : compact ? 0.48 : 0.38,
+            scale: titleMode ? 1 : 0.38,
           }}
           transition={{ type: "spring", stiffness: 130, damping: 18 }}
         >
@@ -140,21 +254,12 @@ export function AmixStoreGallery({
           </p>
           <h2 className="amix3-store-name">{store.name}</h2>
           {titleMode && (
-            <span className="amix3-start">
-              {compact ? "Swipe to browse" : "Scroll to browse the full collection"}
-            </span>
+            <span className="amix3-start">Scroll to browse the full collection</span>
           )}
         </motion.div>
 
         <div className="amix3-canvas">
-          <Canvas
-            camera={{
-              position: compact ? [0, 0.45, 7.4] : [0, 0.55, 6.2],
-              fov: compact ? 42 : 38,
-            }}
-            dpr={compact ? [1, 1.35] : [1, 1.75]}
-            gl={{ antialias: !compact }}
-          >
+          <Canvas camera={{ position: [0, 0.55, 6.2], fov: 38 }} dpr={[1, 1.75]} gl={{ antialias: true }}>
             <color attach="background" args={[theme.floor]} />
             <fog attach="fog" args={[theme.floor, 11, 28]} />
             <ambientLight intensity={1.25} />
@@ -177,7 +282,6 @@ export function AmixStoreGallery({
                 activeIndex={active}
                 accent={theme.accent}
                 primary={theme.primary}
-                compact={compact}
                 onSelect={(i) => {
                   jumpTo(i);
                   const p = products[i];
@@ -242,21 +346,16 @@ export function AmixStoreGallery({
         </div>
         <p className="amix3-hint">
           {titleMode
-            ? compact
-              ? "Swipe up to explore products"
-              : "Scroll to explore products"
-            : compact
-              ? "Swipe for next · tap details below"
-              : active % 2 === 0
-                ? "Product left · details right"
-                : "Product right · details left"}
+            ? "Scroll to explore products"
+            : active % 2 === 0
+              ? "Product left · details right"
+              : "Product right · details left"}
         </p>
       </div>
     </section>
   );
 }
 
-/** Soft floating orbs / ribbons — no floor */
 function MovingBackdrop({
   theme,
   progressRef,
@@ -302,7 +401,6 @@ function MovingBackdrop({
           );
         })}
       </group>
-      {/* soft front wash panels that drift toward camera */}
       <FrontWash color={theme.accent} progressRef={progressRef} />
     </group>
   );
@@ -337,7 +435,6 @@ function ProductField({
   activeIndex,
   accent,
   primary,
-  compact,
   onSelect,
 }: {
   products: Product[];
@@ -345,7 +442,6 @@ function ProductField({
   activeIndex: number;
   accent: string;
   primary: string;
-  compact: boolean;
   onSelect: (i: number) => void;
 }) {
   const activeRef = useRef(activeIndex);
@@ -362,7 +458,6 @@ function ProductField({
           activeRef={activeRef}
           accent={accent}
           primary={primary}
-          compact={compact}
           onSelect={() => onSelect(i)}
         />
       ))}
@@ -377,7 +472,6 @@ function ShowcaseCard({
   activeRef,
   accent,
   primary,
-  compact,
   onSelect,
 }: {
   product: Product;
@@ -386,13 +480,12 @@ function ShowcaseCard({
   activeRef: React.MutableRefObject<number>;
   accent: string;
   primary: string;
-  compact: boolean;
   onSelect: () => void;
 }) {
   const root = useRef<THREE.Group>(null);
   const enter = useRef(0);
   const lastOn = useRef(false);
-  const offSide = useRef(side); // enter from own side; exit opposite
+  const offSide = useRef(side);
   const matRef = useRef<THREE.MeshStandardMaterial>(null);
   const glow = useRef<THREE.PointLight>(null);
   const tex = useMemo(() => {
@@ -414,19 +507,18 @@ function ShowcaseCard({
 
     enter.current = THREE.MathUtils.damp(enter.current, isOn ? 1 : 0, isOn ? 6.5 : 11, dt);
 
-    // Mobile/tablet: keep cards nearer center so they stay fully visible
-    const restX = compact ? side * 0.55 : side * 1.72;
-    const offX = offSide.current * (compact ? 6.4 : 9.2);
+    const restX = side * 1.72;
+    const offX = offSide.current * 9.2;
     const x = THREE.MathUtils.lerp(offX, restX, enter.current);
-    const y = THREE.MathUtils.lerp(0.05, compact ? 0.85 : 0.42, enter.current);
-    const z = THREE.MathUtils.lerp(8, compact ? 0.35 : 0.15, enter.current);
-    const base = compact ? (isLeft ? 1.05 : 0.98) : isLeft ? 1.42 : 1.28;
+    const y = THREE.MathUtils.lerp(0.05, 0.42, enter.current);
+    const z = THREE.MathUtils.lerp(8, 0.15, enter.current);
+    const base = isLeft ? 1.42 : 1.28;
     const s = base * enter.current;
 
     root.current.position.set(x, y, z);
     root.current.rotation.y = THREE.MathUtils.lerp(
       offSide.current * 0.75,
-      compact ? side * 0.04 : side * 0.12,
+      side * 0.12,
       enter.current,
     );
     root.current.rotation.z = THREE.MathUtils.lerp(offSide.current * 0.05, 0, enter.current);
@@ -447,13 +539,12 @@ function ShowcaseCard({
     }
   });
 
-  const w = compact ? (isLeft ? 1.45 : 1.35) : isLeft ? 1.78 : 1.58;
-  const h = compact ? (isLeft ? 1.85 : 1.72) : isLeft ? 2.28 : 2.05;
+  const w = isLeft ? 1.78 : 1.58;
+  const h = isLeft ? 2.28 : 2.05;
 
   return (
     <group ref={root} visible={false}>
       <pointLight ref={glow} position={[0, 0.35, 1.35]} intensity={0} color="#ffffff" distance={5} />
-      {/* soft ground shadow for clear product placement */}
       <mesh position={[0, -h / 2 - 0.12, -0.02]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[Math.max(w, h) * 0.42, 32]} />
         <meshBasicMaterial color="#0d2a2c" transparent opacity={0.12} depthWrite={false} />
