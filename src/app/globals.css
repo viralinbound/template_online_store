@@ -8533,6 +8533,12 @@ button.danger {
   color: var(--ink);
 }
 
+.admin-mobile-bar,
+.admin-mobile-scrim,
+.admin-mobile-tabs {
+  display: none;
+}
+
 .admin-side {
   display: flex;
   flex-direction: column;
@@ -8573,11 +8579,14 @@ button.danger {
   color: rgba(232, 244, 244, 0.55);
 }
 
+.admin-side-nav,
 .admin-side nav {
   display: grid;
   gap: 0.2rem;
 }
 
+.admin-side-nav a,
+.admin-side-nav button,
 .admin-side nav a,
 .admin-side nav button {
   text-decoration: none;
@@ -8592,14 +8601,19 @@ button.danger {
   cursor: pointer;
   font-family: inherit;
   width: 100%;
+  min-height: 42px;
 }
 
+.admin-side-nav a:hover,
+.admin-side-nav button:hover,
 .admin-side nav a:hover,
 .admin-side nav button:hover {
   background: rgba(255, 255, 255, 0.06);
   color: #fff;
 }
 
+.admin-side-nav a.on,
+.admin-side-nav button.on,
 .admin-side nav a.on,
 .admin-side nav button.on {
   background: color-mix(in srgb, var(--brand, #14999c) 75%, #0c1a1c);
@@ -8621,6 +8635,15 @@ button.danger {
 .admin-main {
   padding: 1.5rem clamp(1rem, 3vw, 2rem) 3rem;
   max-width: 1100px;
+  min-width: 0;
+}
+
+.admin-main-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
 }
 
 .admin-main-head h1 {
@@ -8628,6 +8651,18 @@ button.danger {
   font-family: var(--font-display), sans-serif;
   font-size: clamp(1.7rem, 3.5vw, 2.4rem);
   letter-spacing: -0.04em;
+}
+
+.admin-main-storefront {
+  display: none;
+  flex-shrink: 0;
+  margin-top: 0.35rem;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brand);
+  min-height: 40px;
+  align-items: center;
 }
 
 .admin-cards {
@@ -8721,6 +8756,179 @@ button.danger {
   min-width: 4.5rem;
 }
 
+@media (max-width: 1100px) {
+  .admin-app {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-mobile-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 160;
+    min-height: 58px;
+    padding: 0.65rem 0.9rem;
+    padding-top: calc(0.65rem + env(safe-area-inset-top, 0px));
+    background: #0c1a1c;
+    color: #f4fffb;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .admin-mobile-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    min-width: 0;
+  }
+
+  .admin-mobile-brand strong {
+    font-family: var(--font-display), sans-serif;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-mobile-brand span {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(244, 255, 251, 0.55);
+    flex-shrink: 0;
+  }
+
+  .admin-mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .admin-mobile-signout {
+    border: 1px solid rgba(244, 255, 251, 0.22);
+    background: rgba(255, 255, 255, 0.06);
+    color: #f4fffb;
+    border-radius: 999px;
+    min-height: 40px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .admin-mobile-toggle {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 0.65rem;
+    background: rgba(255, 255, 255, 0.08);
+    display: grid;
+    place-content: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .admin-mobile-toggle i {
+    display: block;
+    width: 16px;
+    height: 2px;
+    background: #f4fffb;
+    border-radius: 2px;
+  }
+
+  .admin-mobile-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 155;
+    border: 0;
+    background: rgba(4, 12, 14, 0.45);
+    cursor: pointer;
+  }
+
+  .admin-side {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(280px, 86vw);
+    min-height: 100dvh;
+    z-index: 170;
+    transform: translateX(-105%);
+    transition: transform 0.28s ease;
+    box-shadow: 18px 0 48px rgba(0, 0, 0, 0.28);
+    padding-top: calc(1.1rem + env(safe-area-inset-top, 0px));
+    overflow: auto;
+  }
+
+  .admin-nav-open .admin-side {
+    transform: translateX(0);
+  }
+
+  .admin-main {
+    padding: 1rem 1rem 2.5rem;
+  }
+
+  .admin-main-head {
+    flex-wrap: wrap;
+    margin-bottom: 0.85rem;
+  }
+
+  .admin-main-head h1 {
+    font-size: clamp(1.45rem, 5vw, 2rem);
+  }
+
+  .admin-main-storefront {
+    display: inline-flex;
+  }
+
+  .admin-mobile-tabs {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 0 1rem;
+    padding: 0 0 0.35rem;
+  }
+
+  .admin-mobile-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-mobile-tabs button {
+    flex: 0 0 auto;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    border-radius: 999px;
+    min-height: 40px;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .admin-mobile-tabs button.on {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+  }
+}
+
 @media (max-width: 800px) {
   .admin-cards {
     grid-template-columns: 1fr;
@@ -8730,38 +8938,8 @@ button.danger {
     grid-template-columns: 1fr;
   }
 
-  .admin-side {
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.75rem 1rem;
-  }
-
-  .admin-side nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    width: 100%;
-  }
-
-  .admin-side nav a,
-  .admin-side nav button {
-    padding: 0.4rem 0.7rem;
-    font-size: 0.78rem;
-    width: auto;
-  }
-
-  .admin-side-out {
-    margin-top: 0;
-    margin-left: auto;
-  }
-
   .admin-main {
-    padding: 1.1rem 1rem 2.5rem;
+    padding: 0.95rem 0.85rem 2.5rem;
   }
 
   .floor-immersive-copy {
