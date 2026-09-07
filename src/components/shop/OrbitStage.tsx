@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { QuickLook3D } from "@/components/commerce/QuickLook3D";
 import { formatMoney } from "@/lib/money";
+import { productHref } from "@/lib/catalog";
 import { orbitPoint } from "@/lib/motion";
 import { useMallStore } from "@/store/useMallStore";
 import type { Product } from "@/types/mall";
@@ -188,6 +190,9 @@ export function OrbitStage({
           <button type="button" className="primary" onClick={() => setLook(center)}>
             Quick look
           </button>
+          <Link href={productHref(center)} className="ghost">
+            Full page
+          </Link>
           <button
             type="button"
             onClick={() => {

@@ -125,6 +125,9 @@ export function ProductCard3D({
             <button type="button" className="pc3d-view" onClick={() => setQuick(true)}>
               Look
             </button>
+            <Link href={productHref(product)} className="pc3d-view pc3d-fullpage">
+              Full page
+            </Link>
             <button
               type="button"
               className={inCompare ? "on" : ""}

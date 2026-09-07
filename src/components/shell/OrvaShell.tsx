@@ -9,7 +9,6 @@ import { MallFooter } from "@/components/MallFooter";
 import { BagFly } from "@/components/commerce/BagFly";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { AmbientField } from "@/components/shell/AmbientField";
-import { OrderEaseDock } from "@/components/shell/OrderEaseDock";
 import { OrvaStudioHeader } from "@/components/shell/OrvaStudioHeader";
 import { PageMotion } from "@/components/shell/PageMotion";
 import { productHref } from "@/lib/catalog";
@@ -108,7 +107,6 @@ export function OrvaShell({ children, bare = false }: { children: ReactNode; bar
         }}
       />
       <CartNudge />
-      <OrderEaseDock />
     </div>
   );
 }

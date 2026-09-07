@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { ProductPrice } from "@/components/ui/ProductPrice";
 import { StockPill } from "@/components/ui/StockPill";
@@ -19,7 +20,7 @@ type Props = {
   onBuyNow?: () => void;
 };
 
-/** Center quick-look — photo + color + buy (no 3D) */
+/** Center quick-look — portaled to body so Look / Full page work on every device */
 export function QuickLook3D({
   product,
   currency = "INR",
@@ -32,20 +33,30 @@ export function QuickLook3D({
   const toggleCompare = useMallStore((s) => s.toggleCompare);
   const compare = useMallStore((s) => s.compare);
   const [color, setColor] = useState(product.colors[0] ?? "Default");
+  const [mounted, setMounted] = useState(false);
 
   const src = useMemo(() => mediaForColor(product, color), [product, color]);
   const soldOut = product.stock != null && product.stock <= 0;
   const inCompare = compare.some((x) => x.id === product.id);
 
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
   }, [onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       <motion.div
         className="ql3d-backdrop"
@@ -60,10 +71,11 @@ export function QuickLook3D({
         aria-modal="true"
         aria-label={`Quick look · ${product.name}`}
         style={{ ["--a" as string]: accent }}
-        initial={{ opacity: 0, y: 28, scale: 0.97 }}
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 16 }}
+        exit={{ opacity: 0, y: 12 }}
         transition={{ type: "spring", stiffness: 360, damping: 28 }}
+        onClick={(e) => e.stopPropagation()}
       >
         <button type="button" className="ql3d-x" onClick={onClose} aria-label="Close">
           ×
@@ -94,12 +106,7 @@ export function QuickLook3D({
               <p>Color · live preview</p>
               <div className="pp-pills">
                 {product.colors.map((c) => (
-                  <button
-                    type="button"
-                    key={c}
-                    className={color === c ? "on" : ""}
-                    onClick={() => setColor(c)}
-                  >
+                  <button type="button" key={c} className={color === c ? "on" : ""} onClick={() => setColor(c)}>
                     {c}
                   </button>
                 ))}
@@ -130,12 +137,13 @@ export function QuickLook3D({
             <button type="button" className={inCompare ? "on" : ""} onClick={() => toggleCompare(product)}>
               {inCompare ? "In compare" : "Compare"}
             </button>
-            <Link href={productHref(product)} onClick={onClose}>
+            <Link href={productHref(product)} className="ql3d-fullpage" onClick={onClose}>
               Full page →
             </Link>
           </div>
         </div>
       </motion.div>
-    </>
+    </>,
+    document.body,
   );
 }

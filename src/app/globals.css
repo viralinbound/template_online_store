@@ -6344,9 +6344,16 @@ a.ghost {
 .pc3d-media {
   position: relative;
   display: block;
+  width: 100%;
   aspect-ratio: 4 / 5;
   overflow: hidden;
   background: #e4ecec;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .pc3d-media img {
@@ -6389,13 +6396,16 @@ a.ghost {
 
 .pc3d-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
   margin-top: 0.25rem;
 }
 
 .pc3d-actions button,
-.pc3d-actions .pc3d-view {
-  flex: 1;
+.pc3d-actions .pc3d-view,
+.pc3d-actions a.pc3d-view {
+  flex: 1 1 calc(50% - 0.2rem);
+  min-height: 42px;
   border: 1px solid var(--line);
   background: #fff;
   border-radius: 0.55rem;
@@ -6406,6 +6416,17 @@ a.ghost {
   text-align: center;
   text-decoration: none;
   color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pc3d-actions .pc3d-fullpage {
+  background: #0b1f1c;
+  color: #f4fffb;
+  border-color: #0b1f1c;
 }
 
 .pc3d-actions .buy {
@@ -7588,16 +7609,18 @@ a.ghost {
 .ql3d-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 220;
   background: rgba(8, 28, 30, 0.55);
   backdrop-filter: blur(6px);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .ql3d-modal {
   position: fixed;
-  z-index: 101;
+  z-index: 221;
   left: 50%;
   top: 50%;
+  translate: -50% -50%;
   width: min(920px, calc(100vw - 1.25rem));
   max-height: min(90dvh, 720px);
   overflow: auto;
@@ -7606,13 +7629,28 @@ a.ghost {
   background: #fff;
   border-radius: 1.15rem;
   box-shadow: 0 28px 80px rgba(8, 28, 30, 0.35);
-  margin-left: calc(min(920px, calc(100vw - 1.25rem)) / -2);
-  margin-top: -min(45dvh, 360px);
+  margin: 0;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: manipulation;
 }
 
 @media (min-width: 800px) {
   .ql3d-modal {
     grid-template-columns: 1.05fr 0.95fr;
+  }
+}
+
+@media (max-width: 799px) {
+  .ql3d-modal {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    translate: none;
+    width: 100%;
+    max-height: min(92dvh, 900px);
+    border-radius: 1rem 1rem 0 0;
   }
 }
 
@@ -7674,7 +7712,8 @@ a.ghost {
 .ql3d-actions button,
 .ql3d-actions a {
   border-radius: 999px;
-  padding: 0.55rem 0.9rem;
+  padding: 0.65rem 1rem;
+  min-height: 44px;
   font-size: 0.82rem;
   font-weight: 700;
   border: 1px solid var(--line);
@@ -7682,6 +7721,10 @@ a.ghost {
   cursor: pointer;
   text-decoration: none;
   color: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
 }
 
 .ql3d-actions .primary {
@@ -7693,6 +7736,12 @@ a.ghost {
 .ql3d-actions button.on {
   background: rgba(20, 153, 156, 0.12);
   border-color: var(--accent);
+}
+
+.ql3d-fullpage {
+  background: #0b1f1c !important;
+  color: #f4fffb !important;
+  border-color: #0b1f1c !important;
 }
 
 .shelf-walk {
@@ -10827,21 +10876,7 @@ button.danger {
 }
 
 .order-ease-dock {
-  position: fixed;
-  left: 50%;
-  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-  transform: translateX(-50%);
-  z-index: 70;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: min(560px, calc(100% - 1.5rem));
-  padding: 0.7rem 0.75rem 0.7rem 1.1rem;
-  border-radius: 999px;
-  background: rgba(7, 17, 31, 0.92);
-  color: #fff;
-  box-shadow: 0 18px 48px rgba(7, 17, 31, 0.35);
-  backdrop-filter: blur(16px);
+  display: none !important;
 }
 
 .order-ease-copy {
