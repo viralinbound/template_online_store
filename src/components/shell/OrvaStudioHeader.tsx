@@ -81,9 +81,14 @@ export function OrvaStudioHeader({
           <strong>{brand}</strong>
         </Link>
 
+        {/* Order: Search → Orders → Account → Compare → Bag → Menu */}
         <div className="orva-studio-actions">
           <Link href="/search" className="orva-studio-quiet">
             Search
+          </Link>
+
+          <Link href="/orders" className="orva-studio-quiet">
+            Orders
           </Link>
 
           {isAdmin && (
@@ -94,9 +99,9 @@ export function OrvaStudioHeader({
 
           {sessionName ? (
             <>
-              <Link href="/orders" className="orva-studio-quiet">
+              <span className="orva-studio-quiet orva-studio-user" title={sessionName}>
                 {sessionName}
-              </Link>
+              </span>
               {onSignOut && (
                 <button type="button" className="orva-studio-quiet" onClick={onSignOut}>
                   Sign out

@@ -10990,11 +10990,20 @@ button.danger {
 }
 
 .orva-studio-header.no-top-nav .orva-studio-bar {
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.25rem;
 }
 
 .orva-studio-header.no-top-nav .orva-studio-brand {
   justify-self: start;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.orva-studio-header.no-top-nav .orva-studio-brand strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .orva-studio-nav {
@@ -11081,7 +11090,19 @@ button.danger {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  flex-wrap: nowrap;
   gap: 0.55rem 0.85rem;
+  min-width: 0;
+  justify-self: end;
+}
+
+.orva-studio-user {
+  max-width: 7rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.72;
+  pointer-events: none;
 }
 
 .orva-studio-quiet {
