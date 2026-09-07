@@ -5,7 +5,7 @@
  */
 
 const u = (id: string, w: number, h: number) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=85&fm=jpg`;
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=92&fm=jpg&sat=8`;
 
 function hash(seed: string): number {
   let h = 2166136261;
@@ -348,15 +348,15 @@ const CATEGORY_POOLS: Record<string, string[]> = {
   ],
 };
 
-const LANDING_HERO = u("photo-1441986300917-64674bd600d8", 1920, 1200);
+const LANDING_HERO = u("photo-1567449303078-57ad995bd329", 2400, 1400);
 
 const FLOOR_HEROES: Record<string, string> = {
-  G: u("photo-1441986300917-64674bd600d8", 1600, 1000),
-  "01": u("photo-1441984904996-e0b6ba687e04", 1600, 1000),
-  "02": u("photo-1498049794561-7780e7231661", 1600, 1000),
-  "03": u("photo-1618221195710-dd6b41faaea6", 1600, 1000),
-  "04": u("photo-1445205170230-053b83016050", 1600, 1000),
-  "05": u("photo-1554118811-1e0d58224f24", 1600, 1000),
+  G: u("photo-1567449303078-57ad995bd329", 2000, 1200),
+  "01": u("photo-1441984904996-e0b6ba687e04", 2000, 1200),
+  "02": u("photo-1498049794561-7780e7231661", 2000, 1200),
+  "03": u("photo-1618221195710-dd6b41faaea6", 2000, 1200),
+  "04": u("photo-1445205170230-053b83016050", 2000, 1200),
+  "05": u("photo-1554118811-1e0d58224f24", 2000, 1200),
 };
 
 export function productImage(productName: string, productId: string, category?: string): string {

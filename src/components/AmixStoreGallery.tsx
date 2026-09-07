@@ -5,26 +5,35 @@ import { Html } from "@react-three/drei";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { AnimatePresence, motion } from "framer-motion";
+import { ProductPrice } from "@/components/ui/ProductPrice";
+import { StockPill } from "@/components/ui/StockPill";
+import { ProductBadges } from "@/components/ui/ProductBadges";
 import type { Product, StoreNode } from "@/types/mall";
 
 type Props = {
   store: StoreNode;
   floorLabel: string;
   accent: string;
+  currency?: string;
+  locale?: string;
   onBack: () => void;
   onOpenProduct: (p: Product) => void;
   onBuy: (p: Product) => void;
   onBuyNow: (p: Product) => void;
+  onShop?: () => void;
 };
 
 export function AmixStoreGallery({
   store,
   floorLabel,
   accent,
+  currency = "INR",
+  locale = "en-IN",
   onBack,
   onOpenProduct,
   onBuy,
   onBuyNow,
+  onShop,
 }: Props) {
   const [compact, setCompact] = useState<boolean | null>(null);
 
@@ -57,10 +66,13 @@ export function AmixStoreGallery({
         store={store}
         floorLabel={floorLabel}
         accent={accent}
+        currency={currency}
+        locale={locale}
         onBack={onBack}
         onOpenProduct={onOpenProduct}
         onBuy={onBuy}
         onBuyNow={onBuyNow}
+        onShop={onShop}
       />
     );
   }
@@ -70,10 +82,13 @@ export function AmixStoreGallery({
       store={store}
       floorLabel={floorLabel}
       accent={accent}
+      currency={currency}
+      locale={locale}
       onBack={onBack}
       onOpenProduct={onOpenProduct}
       onBuy={onBuy}
       onBuyNow={onBuyNow}
+      onShop={onShop}
     />
   );
 }
@@ -83,13 +98,18 @@ function MobileStoreBrowse({
   store,
   floorLabel,
   accent,
+  currency = "INR",
+  locale = "en-IN",
   onBack,
   onOpenProduct,
   onBuy,
   onBuyNow,
+  onShop,
 }: Props) {
   const theme = store.theme;
   const products = store.products;
+  const [focus, setFocus] = useState(0);
+  const current = products[focus] ?? products[0];
 
   return (
     <section
@@ -112,22 +132,29 @@ function MobileStoreBrowse({
           </p>
           <h2>{store.name}</h2>
         </div>
+        {onShop && (
+          <button type="button" className="amix-m-shop" onClick={onShop}>
+            Shop
+          </button>
+        )}
       </header>
 
-      <p className="amix-m-count">{products.length} products in this collection</p>
+      <p className="amix-m-count">{products.length} products · tap Buy to order fast</p>
 
       <div className="amix-m-list">
         {products.map((p, i) => (
           <motion.article
             key={p.id}
-            className="amix-m-card"
+            className={`amix-m-card ${focus === i ? "on" : ""}`}
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: Math.min(i * 0.04, 0.28), duration: 0.35 }}
+            onClick={() => setFocus(i)}
           >
             <button type="button" className="amix-m-media" onClick={() => onOpenProduct(p)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={p.image} alt={p.name} loading="lazy" />
+              <ProductBadges badges={p.badges} />
             </button>
             <div className="amix-m-body">
               <button type="button" className="amix-m-title" onClick={() => onOpenProduct(p)}>
@@ -136,23 +163,40 @@ function MobileStoreBrowse({
               </button>
               <div className="amix-m-meta">
                 <em>★ {p.rating.toFixed(1)}</em>
-                <b>₹{p.price.toLocaleString("en-IN")}</b>
+                <StockPill stock={p.stock} />
               </div>
+              <ProductPrice product={p} currency={currency} locale={locale} size="sm" />
+              <p className="amix-trust-line">2–4 day delivery · 7-day returns</p>
               <div className="amix-m-actions">
-                <button type="button" className="buy" onClick={() => onOpenProduct(p)}>
-                  View
+                <button type="button" className="buy-now" onClick={() => onBuyNow(p)}>
+                  Buy now
                 </button>
                 <button type="button" className="bag" onClick={() => onBuy(p)}>
-                  Add to cart
+                  Add
                 </button>
-                <button type="button" className="bag" onClick={() => onBuyNow(p)}>
-                  Buy now
+                <button type="button" className="view" onClick={() => onOpenProduct(p)}>
+                  Details
                 </button>
               </div>
             </div>
           </motion.article>
         ))}
       </div>
+
+      {current && (
+        <div className="amix-m-sticky">
+          <div>
+            <strong>{current.name.split(" · ")[0]}</strong>
+            <ProductPrice product={current} currency={currency} locale={locale} size="sm" />
+          </div>
+          <button type="button" onClick={() => onBuy(current)}>
+            Add
+          </button>
+          <button type="button" className="buy-now" onClick={() => onBuyNow(current)}>
+            Buy
+          </button>
+        </div>
+      )}
     </section>
   );
 }
@@ -161,10 +205,13 @@ function DesktopStoreGallery({
   store,
   floorLabel,
   accent,
+  currency = "INR",
+  locale = "en-IN",
   onBack,
   onOpenProduct,
   onBuy,
   onBuyNow,
+  onShop,
 }: Props) {
   const products = store.products;
   const [active, setActive] = useState(-1);
@@ -284,8 +331,6 @@ function DesktopStoreGallery({
                 primary={theme.primary}
                 onSelect={(i) => {
                   jumpTo(i);
-                  const p = products[i];
-                  if (p) onOpenProduct(p);
                 }}
               />
             </Suspense>
@@ -309,12 +354,13 @@ function DesktopStoreGallery({
                   {String(active + 1).padStart(2, "0")} / {String(products.length).padStart(2, "0")}
                 </em>
               </div>
+              <ProductBadges badges={current.badges} />
               <h3>{current.name}</h3>
               <p className="amix3-copy">{current.description}</p>
               <ul>
                 <li>
                   <em>Rating</em>
-                  <span>{current.rating.toFixed(1)} / 5</span>
+                  <span>★ {current.rating.toFixed(1)} / 5</span>
                 </li>
                 <li>
                   <em>Colors</em>
@@ -325,31 +371,51 @@ function DesktopStoreGallery({
                   <span>{current.sizes.join(" / ")}</span>
                 </li>
               </ul>
-              <p className="amix3-price">₹{current.price.toLocaleString("en-IN")}</p>
+              {current.reviews?.[0] && (
+                <blockquote className="amix3-review-snip">
+                  “{current.reviews[0].body.slice(0, 88)}
+                  {current.reviews[0].body.length > 88 ? "…" : ""}”
+                  <cite>— {current.reviews[0].author}</cite>
+                </blockquote>
+              )}
+              <div className="amix3-price-row">
+                <ProductPrice product={current} currency={currency} locale={locale} size="lg" />
+                <StockPill stock={current.stock} />
+              </div>
+              <p className="amix-trust-line">
+                {current.shippingNote ?? "Delivery in 2–4 days"} ·{" "}
+                {current.returnNote ?? "7-day easy returns"}
+              </p>
               <div className="amix3-actions">
-                <button type="button" className="buy" onClick={() => onOpenProduct(current)}>
-                  View details
+                <button type="button" className="buy-now" onClick={() => onBuyNow(current)}>
+                  Buy now
                 </button>
                 <button type="button" className="bag" onClick={() => onBuy(current)}>
                   Add to cart
                 </button>
-                <button type="button" className="bag" onClick={() => onBuyNow(current)}>
-                  Buy now
+                <button type="button" className="view" onClick={() => onOpenProduct(current)}>
+                  View details
                 </button>
               </div>
             </motion.aside>
           )}
         </AnimatePresence>
 
+        {onShop && (
+          <button type="button" className="amix3-skip-shop" onClick={onShop}>
+            Skip to Shop
+          </button>
+        )}
+
         <div className="amix3-progress">
           <i style={{ width: `${Math.round(productProgress * 100)}%` }} />
         </div>
         <p className="amix3-hint">
           {titleMode
-            ? "Scroll to explore products"
+            ? "Scroll to explore · Buy now from the card"
             : active % 2 === 0
-              ? "Product left · details right"
-              : "Product right · details left"}
+              ? "Product left · order from the card"
+              : "Product right · order from the card"}
         </p>
       </div>
     </section>

@@ -1,0 +1,193 @@
+{
+  "config": {
+    "brandName": "MegaMall Live",
+    "tagline": "Connected catalog · edit this file or POST /api/catalog/ingest",
+    "currency": "INR",
+    "locale": "en-IN",
+    "supportEmail": "hello@megamall.demo",
+    "trustPoints": [
+      "Live catalog sync",
+      "SQL & NoSQL ready",
+      "2–4 day delivery",
+      "7-day returns"
+    ],
+    "featureFlags": {
+      "explore": true,
+      "shop": true,
+      "directory": true,
+      "wishlist": true,
+      "reviews": true,
+      "coupons": true,
+      "guestCheckout": false
+    },
+    "dataSource": "json"
+  },
+  "floors": [
+    {
+      "id": "floor-0",
+      "level": 0,
+      "label": "G",
+      "title": "Ground Atrium",
+      "categoryName": "fashion · beauty · electronics",
+      "subcategories": [
+        "fashion",
+        "beauty",
+        "electronics"
+      ],
+      "stores": [
+        {
+          "id": "aura",
+          "slug": "aura-atelier",
+          "name": "AURA Atelier",
+          "category": "fashion",
+          "subcategory": "fashion",
+          "floor": 0,
+          "wing": "plaza",
+          "theme": {
+            "primary": "#0f3d40",
+            "accent": "#14999c",
+            "floor": "#f2f8f8",
+            "wall": "#d9ecec"
+          },
+          "doorImage": "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=900&q=80",
+          "products": [
+            {
+              "id": "live-1",
+              "slug": "studio-merino-coat",
+              "sku": "SKU-live-1",
+              "name": "Studio Merino Coat",
+              "brand": "AURA Atelier",
+              "price": 8999,
+              "compareAtPrice": 10999,
+              "currency": "INR",
+              "rating": 4.8,
+              "reviewCount": 42,
+              "colors": [
+                "Black",
+                "Camel"
+              ],
+              "sizes": [
+                "S",
+                "M",
+                "L"
+              ],
+              "shelfIndex": 0,
+              "storeId": "aura",
+              "category": "fashion",
+              "subcategory": "fashion",
+              "image": "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=900&q=80",
+              "description": "Sample live product — replace via SQL, Mongo, or ingest API.",
+              "tags": [],
+              "badges": [
+                "new",
+                "sale"
+              ],
+              "stock": 12,
+              "updatedAt": "2026-09-07T06:56:06.682Z"
+            }
+          ],
+          "featured": true
+        },
+        {
+          "id": "lumie",
+          "slug": "lumi-beauty",
+          "name": "Lumié Beauty",
+          "category": "beauty",
+          "subcategory": "beauty",
+          "floor": 0,
+          "wing": "plaza",
+          "theme": {
+            "primary": "#0f3d40",
+            "accent": "#14999c",
+            "floor": "#f2f8f8",
+            "wall": "#d9ecec"
+          },
+          "doorImage": "https://images.unsplash.com/photo-1620916565916-15f23c8c0f4b?w=900&q=80",
+          "products": [
+            {
+              "id": "live-2",
+              "slug": "vitamin-c-serum",
+              "sku": "SKU-live-2",
+              "name": "Vitamin C Serum",
+              "brand": "Lumié Beauty",
+              "price": 2499,
+              "compareAtPrice": null,
+              "currency": "INR",
+              "rating": 4.6,
+              "reviewCount": 128,
+              "colors": [
+                "Default"
+              ],
+              "sizes": [
+                "One Size"
+              ],
+              "shelfIndex": 0,
+              "storeId": "lumie",
+              "category": "beauty",
+              "subcategory": "beauty",
+              "image": "https://images.unsplash.com/photo-1620916565916-15f23c8c0f4b?w=900&q=80",
+              "description": "Brightening serum from your connected catalog.",
+              "tags": [],
+              "badges": [
+                "bestseller"
+              ],
+              "stock": 40,
+              "updatedAt": "2026-09-07T06:56:06.682Z"
+            }
+          ],
+          "featured": true
+        },
+        {
+          "id": "nextron",
+          "slug": "nextron-core",
+          "name": "Nextron Core",
+          "category": "electronics",
+          "subcategory": "electronics",
+          "floor": 0,
+          "wing": "plaza",
+          "theme": {
+            "primary": "#0f3d40",
+            "accent": "#14999c",
+            "floor": "#f2f8f8",
+            "wall": "#d9ecec"
+          },
+          "doorImage": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900&q=80",
+          "products": [
+            {
+              "id": "live-3",
+              "slug": "ultrabook-pro-14",
+              "sku": "SKU-live-3",
+              "name": "Ultrabook Pro 14",
+              "brand": "Nextron Core",
+              "price": 89999,
+              "compareAtPrice": 99999,
+              "currency": "INR",
+              "rating": 4.7,
+              "reviewCount": 0,
+              "colors": [
+                "Default"
+              ],
+              "sizes": [
+                "One Size"
+              ],
+              "shelfIndex": 0,
+              "storeId": "nextron",
+              "category": "electronics",
+              "subcategory": "electronics",
+              "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900&q=80",
+              "description": "Flagship laptop row — field names match common SQL columns.",
+              "tags": [],
+              "badges": [
+                "limited"
+              ],
+              "stock": 5,
+              "updatedAt": "2026-09-07T06:56:06.682Z"
+            }
+          ],
+          "featured": false
+        }
+      ]
+    }
+  ],
+  "generatedAt": "2026-09-07T06:56:06.683Z"
+}

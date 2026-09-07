@@ -1,0 +1,21 @@
+{
+  "documents": [
+    {
+      "_id": "mongo-1",
+      "title": "Heritage Chronograph",
+      "price": 45999,
+      "compare_at_price": 52999,
+      "category": "luxury",
+      "brand": "Maison Time",
+      "store_id": "maison-time",
+      "image": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=900&q=80",
+      "description": "NoSQL document — Atlas Data API or any Mongo JSON export works.",
+      "rating": 4.9,
+      "review_count": 18,
+      "stock": 3,
+      "colors": ["Silver", "Gold"],
+      "sizes": ["One Size"],
+      "badges": ["exclusive", "limited"]
+    }
+  ]
+}

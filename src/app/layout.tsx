@@ -1,3 +1,4 @@
+import { OrvaProviders } from "@/components/shell/OrvaProviders";
 import type { Metadata, Viewport } from "next";
 import { Syne, DM_Sans } from "next/font/google";
 import "./globals.css";
@@ -15,9 +16,9 @@ const body = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "MegaMall — Premium Virtual Retail",
+  title: "Orva — Modern Ecommerce Platform",
   description:
-    "Explore professional floor destinations, curated store collections, and shop with secure account checkout.",
+    "Premium mall ecommerce — shop, scroll floors, Food Court, and checkout in one experience.",
 };
 
 export const viewport: Viewport = {
@@ -31,7 +32,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">{children}</body>
+      <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">
+        <OrvaProviders>{children}</OrvaProviders>
+      </body>
     </html>
   );
 }

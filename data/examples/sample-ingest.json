@@ -1,0 +1,63 @@
+{
+  "config": {
+    "brandName": "MegaMall Live",
+    "tagline": "Connected catalog · edit this file or POST /api/catalog/ingest",
+    "currency": "INR",
+    "locale": "en-IN",
+    "trustPoints": [
+      "Live catalog sync",
+      "SQL & NoSQL ready",
+      "2–4 day delivery",
+      "7-day returns"
+    ]
+  },
+  "products": [
+    {
+      "id": "live-1",
+      "name": "Studio Merino Coat",
+      "title": "Studio Merino Coat",
+      "price": 8999,
+      "compare_at_price": 10999,
+      "currency": "INR",
+      "category": "fashion",
+      "brand": "AURA Atelier",
+      "store_id": "aura",
+      "image": "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=900&q=80",
+      "description": "Sample live product — replace via SQL, Mongo, or ingest API.",
+      "rating": 4.8,
+      "review_count": 42,
+      "stock": 12,
+      "colors": ["Black", "Camel"],
+      "sizes": ["S", "M", "L"],
+      "badges": ["new", "sale"]
+    },
+    {
+      "id": "live-2",
+      "name": "Vitamin C Serum",
+      "price": 2499,
+      "category": "beauty",
+      "brand": "Lumié Beauty",
+      "store_id": "lumie",
+      "image": "https://images.unsplash.com/photo-1620916565916-15f23c8c0f4b?w=900&q=80",
+      "description": "Brightening serum from your connected catalog.",
+      "rating": 4.6,
+      "review_count": 128,
+      "stock": 40,
+      "badges": ["bestseller"]
+    },
+    {
+      "id": "live-3",
+      "name": "Ultrabook Pro 14",
+      "price": 89999,
+      "mrp": 99999,
+      "category": "electronics",
+      "brand": "Nextron Core",
+      "store_id": "nextron",
+      "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900&q=80",
+      "description": "Flagship laptop row — field names match common SQL columns.",
+      "rating": 4.7,
+      "stock": 5,
+      "badges": ["limited"]
+    }
+  ]
+}

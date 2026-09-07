@@ -234,6 +234,13 @@ const wings = ["north", "east", "south", "west", "plaza", "lane", "court", "gate
 
 const finishes = ["Noir", "Ivory", "Slate", "Sand", "Ink", "Pearl"] as const;
 
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function createProducts(
   storeId: string,
   category: MallCategory,
@@ -248,21 +255,69 @@ function createProducts(
     const finish = finishes[i % finishes.length];
     const name = `${baseName} · ${finish}`;
     const blurb = productBlurbs[baseName] ?? `${baseName} from the ${storeName} collection.`;
+    const price = 1499 + (i + 1) * 350 + (category === "luxury" ? 4000 : 0);
+    const onSale = i % 5 === 0;
+    const limited = i % 7 === 0;
+    const bestseller = i % 4 === 0;
+    const image = productImage(baseName, id, category);
+    const gallery = [
+      image,
+      productImage(baseName, `${id}-g1`, category),
+      productImage(baseName, `${id}-g2`, category),
+    ];
+    const rating = Math.min(5, 4.2 + ((i % 8) * 0.1));
+    const reviewCount = 12 + ((i * 17) % 180);
+    const badges: Product["badges"] = [];
+    if (onSale) badges.push("sale");
+    if (limited) badges.push("limited");
+    if (bestseller) badges.push("bestseller");
+    if (i < 2) badges.push("new");
+    if (category === "luxury" && i % 3 === 0) badges.push("exclusive");
+
+    const reviews: Product["reviews"] =
+      i % 3 === 0
+        ? [
+            {
+              id: `${id}-r0`,
+              author: ["Aanya", "Rohan", "Meera", "Kabir"][i % 4],
+              rating: Math.min(5, Math.round(rating)),
+              title: "Worth the visit",
+              body: `Premium feel and accurate photos. Bought from ${storeName}.`,
+              createdAt: new Date(Date.UTC(2026, (i % 8), 4 + (i % 20))).toISOString(),
+            },
+          ]
+        : [];
+
     return {
       id,
+      slug: `${slugify(baseName)}-${slugify(finish)}-${i}`,
+      sku: `MM-${category.slice(0, 3).toUpperCase()}-${String(i + 1).padStart(4, "0")}`,
       name,
-      price: 1499 + (i + 1) * 350 + (category === "luxury" ? 4000 : 0),
-      rating: 4.2 + ((i % 8) * 0.1),
+      brand: storeName,
+      price,
+      compareAtPrice: onSale ? Math.round(price * 1.18) : null,
+      currency: "INR",
+      rating,
+      reviewCount,
+      reviews,
       colors: ["Black", "Ivory", "Navy"],
-      sizes: category === "electronics" || category === "home" || category === "food"
-        ? ["One Size"]
-        : ["S", "M", "L", "XL"],
+      sizes:
+        category === "electronics" || category === "home" || category === "food"
+          ? ["One Size"]
+          : ["S", "M", "L", "XL"],
       shelfIndex: i,
       storeId,
       category,
       subcategory,
-      image: productImage(baseName, id, category),
+      image,
+      gallery,
       description: `${blurb} Available at ${storeName} in ${subcategory}.`,
+      tags: [category, subcategory, finish.toLowerCase()],
+      badges,
+      stock: limited ? 3 + (i % 4) : i % 11 === 0 ? 0 : 24 + (i % 40),
+      shippingNote: "Delivery in 2–4 days across major cities (demo).",
+      returnNote: "Easy returns within 7 days on unused items (demo).",
+      updatedAt: new Date().toISOString(),
     };
   });
 }
@@ -273,6 +328,7 @@ export const mallFloors: MallFloor[] = floorPrograms.map((program, level) => {
     const id = `f${level}-${wing}-${spec.category}-${i}`;
     return {
       id,
+      slug: slugify(spec.name),
       name: spec.name,
       category: spec.category,
       subcategory: spec.subcategory,
@@ -281,6 +337,9 @@ export const mallFloors: MallFloor[] = floorPrograms.map((program, level) => {
       theme: themes[spec.category],
       doorImage: storeDoorImage(spec.name, spec.category, id),
       products: createProducts(id, spec.category, spec.subcategory, spec.name, 12),
+      description: `${spec.name} — curated ${spec.subcategory.toLowerCase()} on Floor ${level === 0 ? "G" : `0${level}`}.`,
+      hours: "10:00 – 22:00",
+      featured: i < 2,
     };
   });
 

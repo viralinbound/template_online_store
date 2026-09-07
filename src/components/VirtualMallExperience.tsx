@@ -3,10 +3,41 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AmixStoreGallery } from "@/components/AmixStoreGallery";
-import { mallFloors, storeCollage } from "@/data/mallData";
-import { floorHeroImage, landingHeroImage } from "@/lib/images";
-import { useMallStore } from "@/store/useMallStore";
-import type { Product, StoreNode } from "@/types/mall";
+import { useCatalog } from "@/components/CatalogProvider";
+import { MallDirectory } from "@/components/MallDirectory";
+import { MallFooter } from "@/components/MallFooter";
+import { OrvaMarketingHome } from "@/components/pages/OrvaMarketingHome";
+import { ShopDestination } from "@/components/ShopDestination";
+import { CartToast } from "@/components/commerce/CartToast";
+import { CheckoutPanel, OrderCard } from "@/components/commerce/CheckoutPanel";
+import { ProductPage } from "@/components/commerce/ProductPage";
+import {
+  CartNudge,
+  CompareTray,
+  MobileStickyBag,
+  ReferralBanner,
+  SkipToShop,
+} from "@/components/commerce/ShoppingChrome";
+import { ProductBadges } from "@/components/ui/ProductBadges";
+import { ProductPrice } from "@/components/ui/ProductPrice";
+import { StockPill } from "@/components/ui/StockPill";
+import { LiveSourceBadge } from "@/components/ui/LiveSourceBadge";
+import { storeCollage } from "@/data/mallData";
+import {
+  HELP_SECTIONS,
+  relatedProducts,
+  searchProducts,
+  suggestProducts,
+  allProducts,
+} from "@/lib/catalog";
+import { floorHeroImage } from "@/lib/images";
+import { formatMoney } from "@/lib/money";
+import {
+  LOCAL_COUPONS,
+  useMallStore,
+  type PaymentMethod,
+} from "@/store/useMallStore";
+import type { MallSiteConfig, Product, StoreNode } from "@/types/mall";
 
 type FloorPage = {
   level: number;
@@ -65,11 +96,27 @@ const FLOOR_META: Omit<
   },
 ];
 
-type Phase = "floors" | "lobby" | "store" | "product";
+type Phase = "floors" | "lobby" | "store" | "product" | "shop" | "directory";
 
 export function VirtualMallExperience() {
+  const { floors: mallFloors, config, loading: catalogLoading } = useCatalog();
   const bag = useMallStore((s) => s.bag);
+  const wishlist = useMallStore((s) => s.wishlist);
+  const recent = useMallStore((s) => s.recent);
+  const couponCode = useMallStore((s) => s.couponCode);
+  const couponError = useMallStore((s) => s.couponError);
   const addToBag = useMallStore((s) => s.addToBag);
+  const setQty = useMallStore((s) => s.setQty);
+  const removeFromBag = useMallStore((s) => s.removeFromBag);
+  const toggleWishlist = useMallStore((s) => s.toggleWishlist);
+  const isWishlisted = useMallStore((s) => s.isWishlisted);
+  const pushRecent = useMallStore((s) => s.pushRecent);
+  const applyCoupon = useMallStore((s) => s.applyCoupon);
+  const clearCoupon = useMallStore((s) => s.clearCoupon);
+  const bagCount = useMallStore((s) => s.bagCount);
+  const bagSubtotal = useMallStore((s) => s.bagSubtotal);
+  const bagDiscount = useMallStore((s) => s.bagDiscount);
+  const bagTotal = useMallStore((s) => s.bagTotal);
   const inspect = useMallStore((s) => s.inspect);
   const setInspect = useMallStore((s) => s.setInspect);
   const showBag = useMallStore((s) => s.showBag);
@@ -84,13 +131,24 @@ export function VirtualMallExperience() {
   const showAuth = useMallStore((s) => s.showAuth);
   const authMode = useMallStore((s) => s.authMode);
   const showOrders = useMallStore((s) => s.showOrders);
+  const showSearch = useMallStore((s) => s.showSearch);
+  const showWishlist = useMallStore((s) => s.showWishlist);
   const authError = useMallStore((s) => s.authError);
   const setShowAuth = useMallStore((s) => s.setShowAuth);
   const setShowOrders = useMallStore((s) => s.setShowOrders);
+  const setShowSearch = useMallStore((s) => s.setShowSearch);
+  const setShowWishlist = useMallStore((s) => s.setShowWishlist);
   const signup = useMallStore((s) => s.signup);
   const login = useMallStore((s) => s.login);
   const logout = useMallStore((s) => s.logout);
   const placeOrder = useMallStore((s) => s.placeOrder);
+  const addresses = useMallStore((s) => s.addresses);
+  const lastOrderId = useMallStore((s) => s.lastOrderId);
+  const advanceOrderStatus = useMallStore((s) => s.advanceOrderStatus);
+  const toggleCompare = useMallStore((s) => s.toggleCompare);
+  const compare = useMallStore((s) => s.compare);
+  const setTrackingOrderId = useMallStore((s) => s.setTrackingOrderId);
+  const trackingOrderId = useMallStore((s) => s.trackingOrderId);
 
   const [started, setStarted] = useState(false);
   const [floor, setFloor] = useState(0);
@@ -105,6 +163,14 @@ export function VirtualMallExperience() {
   const [lobbyKey, setLobbyKey] = useState(0);
   const [checkoutName, setCheckoutName] = useState("");
   const [checkoutAddress, setCheckoutAddress] = useState("");
+  const [checkoutPhone, setCheckoutPhone] = useState("");
+  const [checkoutEmail, setCheckoutEmail] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("upi");
+  const [saveAddress, setSaveAddress] = useState(true);
+  const [couponDraft, setCouponDraft] = useState("");
+  const [searchQ, setSearchQ] = useState("");
+  const [returnPhase, setReturnPhase] = useState<Phase>("floors");
+  const [helpSection, setHelpSection] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -115,7 +181,7 @@ export function VirtualMallExperience() {
     () =>
       mallFloors.map((f, i) => {
         const meta = FLOOR_META[i % FLOOR_META.length];
-        const hero = floorHeroImage(f.label, meta.vibe, `mm-floor-${f.label}`);
+        const hero = f.heroImage ?? floorHeroImage(f.label, meta.vibe, `mm-floor-${f.label}`);
         return {
           level: f.level,
           label: f.label,
@@ -128,16 +194,56 @@ export function VirtualMallExperience() {
           collage: [hero, ...f.stores.slice(0, 5).map((s, j) => storeCollage(s, j))],
         };
       }),
-    [],
+    [mallFloors],
   );
 
   const current = pages[floor];
-  const total = bag.reduce((s, p) => s + p.price, 0);
+  const itemCount = hydrated ? bagCount() : 0;
+  const subtotal = hydrated ? bagSubtotal() : 0;
+  const discount = hydrated ? bagDiscount() : 0;
+  const total = hydrated ? bagTotal() : 0;
   const liveSession = hydrated ? session : null;
-  const myOrders = useMemo(
-    () => (liveSession ? orders.filter((o) => o.userId === liveSession.id) : []),
-    [orders, liveSession],
+  const myOrders = useMemo(() => {
+    if (liveSession) return orders.filter((o) => o.userId === liveSession.id);
+    // Guest: show recent guest orders from this device
+    return orders.filter((o) => o.userId.startsWith("guest-")).slice(0, 8);
+  }, [orders, liveSession]);
+  const searchHits = useMemo(() => {
+    const q = searchQ.trim().toLowerCase();
+    if (q.startsWith("under ")) {
+      const max = Number(q.replace(/[^0-9]/g, "")) || 3000;
+      return allProducts(mallFloors)
+        .filter((p) => p.price <= max)
+        .sort((a, b) => a.price - b.price)
+        .slice(0, 24);
+    }
+    if (q.includes("best") || q.includes("top rated")) {
+      return allProducts(mallFloors)
+        .slice()
+        .sort((a, b) => b.rating - a.rating)
+        .slice(0, 24);
+    }
+    return searchProducts(searchQ, 24, mallFloors);
+  }, [searchQ, mallFloors]);
+  const cartSuggestions = useMemo(
+    () => suggestProducts(4, bag.map((l) => l.product.id), mallFloors),
+    [bag, mallFloors],
   );
+  const money = (n: number) => formatMoney(n, config.currency, config.locale);
+  const catalogPool = useMemo(() => allProducts(mallFloors), [mallFloors]);
+
+  const runReorder = (orderId: string) => {
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) return;
+    order.items.forEach((it) => {
+      const found = catalogPool.find((p) => p.id === it.id);
+      if (found) {
+        addToBag(found, { qty: it.qty, size: it.size, color: it.color });
+      }
+    });
+    setShowOrders(false);
+    setShowBag(true);
+  };
 
   useEffect(() => {
     if (liveSession) setCheckoutName(liveSession.name);
@@ -191,6 +297,7 @@ export function VirtualMallExperience() {
   };
 
   const openStore = (s: StoreNode) => {
+    setReturnPhase("lobby");
     void runZoom(
       s.doorImage,
       `${s.name} · ${s.subcategory}`,
@@ -217,13 +324,26 @@ export function VirtualMallExperience() {
     );
   };
 
-  const openProduct = (p: Product) => {
+  const openProduct = (p: Product, from?: Phase) => {
+    pushRecent(p);
+    if (from) setReturnPhase(from);
+    else if (phase !== "product") setReturnPhase(phase);
     void runZoom(
       p.image,
       p.name,
       () => {
         setProduct(p);
         setPhase("product");
+        setStarted(true);
+        setShowSearch(false);
+        setShowWishlist(false);
+        setShowBag(false);
+        const floorIdx = pages.findIndex((pg) => pg.stores.some((s) => s.id === p.storeId));
+        if (floorIdx >= 0) {
+          setFloor(floorIdx);
+          const st = pages[floorIdx]?.stores.find((s) => s.id === p.storeId) ?? null;
+          setStore(st);
+        }
       },
       { floorLabel: current.label, dir: "in" },
     );
@@ -232,56 +352,190 @@ export function VirtualMallExperience() {
   const zoomOutToStore = () => {
     void runZoom(
       product?.image ?? current.hero,
-      store?.name ?? "Collection",
+      returnPhase === "shop" || returnPhase === "directory"
+        ? `Shop ${config.brandName}`
+        : (store?.name ?? "Collection"),
       () => {
         setProduct(null);
-        setPhase("store");
+        if (returnPhase === "shop") {
+          setPhase("shop");
+          setStore(null);
+        } else if (returnPhase === "directory") {
+          setPhase("directory");
+          setStore(null);
+        } else {
+          setPhase("store");
+        }
       },
       { floorLabel: current.label, dir: "out" },
     );
   };
 
+  const goShop = () => {
+    setStarted(true);
+    setPhase("shop");
+    setStore(null);
+    setProduct(null);
+    setReturnPhase("shop");
+  };
+
+  const goExplore = () => {
+    setStarted(true);
+    setPhase("floors");
+    setStore(null);
+    setProduct(null);
+    setReturnPhase("floors");
+  };
+
+  const goDirectory = () => {
+    setStarted(true);
+    setPhase("directory");
+    setStore(null);
+    setProduct(null);
+  };
+
+  const openHelp = (section?: string) => {
+    setHelpSection(section ?? "faq");
+  };
+
+  const openStoreFromShop = (s: StoreNode, floorIndex: number) => {
+    setFloor(floorIndex);
+    setReturnPhase(phase === "directory" ? "directory" : "shop");
+    void runZoom(
+      s.doorImage,
+      `${s.name} · ${s.subcategory}`,
+      () => {
+        setStore(s);
+        setProduct(null);
+        setPhase("store");
+        setStarted(true);
+      },
+      { floorLabel: pages[floorIndex]?.label ?? current.label, dir: "in" },
+    );
+  };
+
+  const openFloorFromDirectory = (floorIndex: number) => {
+    setFloor(floorIndex);
+    setReturnPhase("directory");
+    enterLobby(pages[floorIndex]?.hero, floorIndex);
+  };
+
   const phaseHint =
     phase === "floors"
-      ? " · Floor landing"
+      ? " · Explore floors"
       : phase === "lobby"
         ? " · Lobby"
         : phase === "store"
           ? ` · ${store?.name ?? "Store"}`
-          : ` · ${product?.name ?? "Product"}`;
+          : phase === "shop"
+            ? " · Quick shop"
+            : phase === "directory"
+              ? " · Directory"
+              : ` · ${product?.name ?? "Product"}`;
 
   return (
     <div className="mp">
+      {catalogLoading && (
+        <div className="mm-catalog-loading" aria-live="polite">
+          Loading catalog…
+        </div>
+      )}
       {!started ? (
         <Intro
-          onEnter={() => setStarted(true)}
-          bagCount={bag.length}
+          config={config}
+          onExplore={goExplore}
+          onShop={goShop}
+          onDirectory={goDirectory}
+          onHelp={openHelp}
+          onOpenFloor={(i) => {
+            setFloor(i);
+            goExplore();
+          }}
+          floors={pages.map((p) => ({
+            label: p.label,
+            title: p.title,
+            categoryName: p.categoryName,
+            hero: p.hero,
+            storeCount: p.stores.length,
+          }))}
+          boutiques={mallFloors.flatMap((f) => f.stores.filter((s) => s.featured)).slice(0, 8)}
+          bagCount={itemCount}
           onBag={() => setShowBag(true)}
           sessionName={liveSession?.name ?? null}
           onAuth={(mode) => setShowAuth(true, mode)}
           onOrders={() => setShowOrders(true)}
           orderCount={myOrders.length}
           onLogout={logout}
+          onSearch={() => setShowSearch(true)}
+          onWishlist={() => setShowWishlist(true)}
+          wishCount={wishlist.length}
         />
       ) : (
         <>
           <header className={`mp-nav ${phase === "floors" ? "mp-nav-dark" : ""}`}>
             <div className="mp-nav-brand">
-              <strong>MegaMall</strong>
+              <strong>{config.brandName}</strong>
               <span className="mp-nav-sub">
-                Floor {current.label} · {current.categoryName}
-                {phaseHint}
+                {phase === "shop"
+                  ? `${config.tagline} · Quick shop`
+                  : phase === "directory"
+                    ? "Mall directory · All floors & boutiques"
+                    : `Floor ${current.label} · ${current.categoryName}${phaseHint}`}
               </span>
+              <LiveSourceBadge />
             </div>
             <div className="mp-nav-actions">
+              <div className="mp-mode-toggle" role="group" aria-label="Browse mode">
+                {config.featureFlags.explore && (
+                  <button
+                    type="button"
+                    className={
+                      phase === "shop" ||
+                      phase === "directory" ||
+                      (phase === "product" && (returnPhase === "shop" || returnPhase === "directory"))
+                        ? ""
+                        : "on"
+                    }
+                    onClick={goExplore}
+                  >
+                    Explore
+                  </button>
+                )}
+                {config.featureFlags.shop && (
+                  <button
+                    type="button"
+                    className={
+                      phase === "shop" ||
+                      (phase === "product" && returnPhase === "shop")
+                        ? "on"
+                        : ""
+                    }
+                    onClick={goShop}
+                  >
+                    Shop
+                  </button>
+                )}
+              </div>
+              {config.featureFlags.directory && (
+                <button type="button" onClick={goDirectory}>
+                  Directory
+                </button>
+              )}
               {phase === "product" && (
                 <button type="button" onClick={zoomOutToStore}>
-                  ← Store
+                  {returnPhase === "shop" || returnPhase === "directory" ? "← Shop" : "← Store"}
                 </button>
               )}
               {phase === "store" && (
-                <button type="button" onClick={zoomOutToLobby}>
-                  ← Lobby
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (returnPhase === "shop") goShop();
+                    else if (returnPhase === "directory") goDirectory();
+                    else zoomOutToLobby();
+                  }}
+                >
+                  {returnPhase === "shop" || returnPhase === "directory" ? "← Back" : "← Lobby"}
                 </button>
               )}
               {phase === "lobby" && (
@@ -289,6 +543,15 @@ export function VirtualMallExperience() {
                   ← Floors
                 </button>
               )}
+              <button type="button" onClick={() => setShowSearch(true)}>
+                Search
+              </button>
+              <button type="button" onClick={() => setShowWishlist(true)}>
+                Saved{wishlist.length ? ` (${wishlist.length})` : ""}
+              </button>
+              <button type="button" className="mp-nav-help" onClick={() => openHelp("faq")}>
+                Help
+              </button>
               {liveSession ? (
                 <>
                   <button type="button" className="mp-nav-orders" onClick={() => setShowOrders(true)}>
@@ -300,6 +563,9 @@ export function VirtualMallExperience() {
                 </>
               ) : (
                 <>
+                  <button type="button" className="mp-nav-orders" onClick={() => setShowOrders(true)}>
+                    Orders{myOrders.length > 0 ? ` (${myOrders.length})` : ""}
+                  </button>
                   <button type="button" onClick={() => setShowAuth(true, "login")}>
                     Sign in
                   </button>
@@ -319,26 +585,45 @@ export function VirtualMallExperience() {
                 animate={{ scale: [1, 1.1, 1] }}
                 onClick={() => setShowBag(true)}
               >
-                Cart {bag.length}
+                Cart {itemCount}
               </motion.button>
             </div>
           </header>
 
           <AnimatePresence mode="wait">
-            {phase === "product" && product && store ? (
+            {phase === "product" && product && (store || returnPhase === "shop" || returnPhase === "directory") ? (
               <ProductPage
                 key={product.id}
                 product={product}
-                storeName={store.name}
+                storeName={store?.name ?? config.brandName}
+                floorLabel={current.label}
                 accent={current.accent}
                 ink={current.ink}
                 bg={current.bg}
+                currency={config.currency}
+                locale={config.locale}
+                showReviews={config.featureFlags.reviews}
+                wishlisted={isWishlisted(product.id)}
+                compared={compare.some((x) => x.id === product.id)}
+                related={relatedProducts(product, 4, mallFloors)}
                 onBack={zoomOutToStore}
-                onBuy={() => addToBag(product)}
-                onBuyNow={() => {
-                  addToBag(product);
+                onToggleWish={() => toggleWishlist(product)}
+                onToggleCompare={() => toggleCompare(product)}
+                onOpenRelated={(p) => openProduct(p, returnPhase)}
+                onVisitStore={
+                  store
+                    ? () => {
+                        setProduct(null);
+                        setPhase("store");
+                      }
+                    : undefined
+                }
+                onBuy={(opts) => addToBag(product, opts)}
+                onBuyNow={(opts) => {
+                  addToBag(product, opts);
                   setCheckout(true);
                 }}
+                onHelp={() => openHelp("shipping")}
               />
             ) : phase === "store" && store ? (
               <AmixStoreGallery
@@ -346,13 +631,39 @@ export function VirtualMallExperience() {
                 store={store}
                 floorLabel={current.label}
                 accent={current.accent}
-                onBack={zoomOutToLobby}
-                onOpenProduct={openProduct}
+                currency={config.currency}
+                locale={config.locale}
+                onBack={() => {
+                  if (returnPhase === "shop") goShop();
+                  else if (returnPhase === "directory") goDirectory();
+                  else zoomOutToLobby();
+                }}
+                onOpenProduct={(p) => openProduct(p, "store")}
                 onBuy={(p) => addToBag(p)}
                 onBuyNow={(p) => {
                   addToBag(p);
                   setCheckout(true);
                 }}
+                onShop={goShop}
+              />
+            ) : phase === "directory" ? (
+              <MallDirectory
+                key="directory"
+                accent={current.accent}
+                onOpenFloor={openFloorFromDirectory}
+                onOpenStore={openStoreFromShop}
+                onShop={goShop}
+              />
+            ) : phase === "shop" ? (
+              <ShopDestination
+                key="shop-dest"
+                accent={current.accent}
+                onOpenProduct={(p) => openProduct(p, "shop")}
+                onBuy={(p) => addToBag(p)}
+                onExploreMall={goExplore}
+                onOpenStore={openStoreFromShop}
+                onDirectory={goDirectory}
+                onHelp={openHelp}
               />
             ) : phase === "lobby" ? (
               <FloorLobby
@@ -365,6 +676,7 @@ export function VirtualMallExperience() {
                 key="floors-scroll"
                 pages={pages}
                 floor={floor}
+                brandName={config.brandName}
                 onFloorChange={setFloor}
                 onEnterLobby={(floorIndex, pic) => enterLobby(pic, floorIndex)}
               />
@@ -428,7 +740,7 @@ export function VirtualMallExperience() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={inspect.image} alt={inspect.name} />
             <h3>{inspect.name}</h3>
-            <p className="price">₹{inspect.price.toLocaleString("en-IN")}</p>
+            <p className="price">{money(inspect.price)}</p>
             <div className="row">
               <button
                 type="button"
@@ -460,32 +772,97 @@ export function VirtualMallExperience() {
           <Overlay onClose={() => setShowBag(false)}>
             <h3>Shopping cart</h3>
             {bag.length === 0 ? (
-              <p className="muted">Your cart is empty.</p>
-            ) : (
-              bag.map((item) => (
-                <div key={item.id} className="bag-line">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.image} alt={item.name} />
-                  <span>{item.name}</span>
-                  <span>₹{item.price.toLocaleString("en-IN")}</span>
+              <>
+                <p className="muted">Your cart is empty — pick something you like.</p>
+                <div className="suggest-grid">
+                  {cartSuggestions.map((p) => (
+                    <button
+                      type="button"
+                      key={p.id}
+                      className="suggest-card"
+                      onClick={() => {
+                        setShowBag(false);
+                        openProduct(p);
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={p.image} alt="" />
+                      <strong>{p.name}</strong>
+                      <span>{money(p.price)}</span>
+                    </button>
+                  ))}
                 </div>
-              ))
+              </>
+            ) : (
+              <>
+                {bag.map((line) => (
+                  <div key={line.key} className="bag-line bag-line-rich">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={line.product.image} alt={line.product.name} />
+                    <div className="bag-line-info">
+                      <span>{line.product.name}</span>
+                      <small>
+                        {line.color} · {line.size}
+                      </small>
+                      <div className="qty-row">
+                        <button type="button" onClick={() => setQty(line.key, line.qty - 1)}>
+                          −
+                        </button>
+                        <em>{line.qty}</em>
+                        <button type="button" onClick={() => setQty(line.key, line.qty + 1)}>
+                          +
+                        </button>
+                        <button type="button" className="linkish" onClick={() => removeFromBag(line.key)}>
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                    <span>{money(line.product.price * line.qty)}</span>
+                  </div>
+                ))}
+                <div className="coupon-row">
+                  <input
+                    value={couponDraft}
+                    onChange={(e) => setCouponDraft(e.target.value)}
+                    placeholder="Coupon · ORVA10"
+                  />
+                  <button type="button" onClick={() => applyCoupon(couponDraft)}>
+                    Apply
+                  </button>
+                  {couponCode && (
+                    <button type="button" className="linkish" onClick={clearCoupon}>
+                      Clear {couponCode}
+                    </button>
+                  )}
+                </div>
+                {couponError && <p className="auth-err">{couponError}</p>}
+                {couponCode && LOCAL_COUPONS[couponCode] && (
+                  <p className="muted">
+                    Applied {couponCode} — {LOCAL_COUPONS[couponCode].label}
+                  </p>
+                )}
+                <p className="muted">Subtotal {money(subtotal)}</p>
+                {discount > 0 && <p className="muted">Discount −{money(discount)}</p>}
+                <p className="price">Total {money(total)}</p>
+                <ReferralBanner onApply={() => applyCoupon("ORVAFRIEND")} />
+              </>
             )}
-            <p className="price">Total ₹{total.toLocaleString("en-IN")}</p>
             <button
               type="button"
               className="primary"
               disabled={!bag.length}
               onClick={() => {
                 setShowBag(false);
-                if (!liveSession) {
+                if (!liveSession && !config.featureFlags.guestCheckout) {
                   setShowAuth(true, "login");
                   return;
                 }
                 setCheckout(true);
               }}
             >
-              {liveSession ? "Proceed to checkout" : "Sign in to checkout"}
+              {liveSession || config.featureFlags.guestCheckout
+                ? "Proceed to checkout"
+                : "Sign in to checkout"}
             </button>
           </Overlay>
         )}
@@ -494,42 +871,147 @@ export function VirtualMallExperience() {
       <AnimatePresence>
         {checkout && !orderOk && (
           <Overlay onClose={() => setCheckout(false)}>
-            <h3>Checkout</h3>
-            {!liveSession ? (
-              <p className="muted">Please sign in or create an account to complete your order.</p>
-            ) : (
-              <>
-                <label>
-                  Name
-                  <input
-                    value={checkoutName}
-                    onChange={(e) => setCheckoutName(e.target.value)}
-                    placeholder="Your name"
-                  />
-                </label>
-                <label>
-                  Address
-                  <input
-                    value={checkoutAddress}
-                    onChange={(e) => setCheckoutAddress(e.target.value)}
-                    placeholder="Delivery address"
-                  />
-                </label>
-                {authError && <p className="auth-err">{authError}</p>}
-                <p className="price">₹{total.toLocaleString("en-IN")}</p>
-                <button
-                  type="button"
-                  className="primary"
-                  onClick={() => {
-                    const ok = placeOrder(checkoutName, checkoutAddress);
-                    if (ok) {
-                      window.setTimeout(() => setOrderOk(false), 1800);
-                    }
-                  }}
-                >
-                  Place order
+            <CheckoutPanel
+              guestAllowed={config.featureFlags.guestCheckout}
+              isGuest={!liveSession}
+              name={checkoutName}
+              phone={checkoutPhone}
+              address={checkoutAddress}
+              email={checkoutEmail}
+              payment={paymentMethod}
+              saveAddress={saveAddress}
+              addresses={addresses}
+              total={total}
+              currency={config.currency}
+              locale={config.locale}
+              error={authError}
+              onName={setCheckoutName}
+              onPhone={setCheckoutPhone}
+              onAddress={setCheckoutAddress}
+              onEmail={setCheckoutEmail}
+              onPayment={setPaymentMethod}
+              onSaveAddress={setSaveAddress}
+              onPickAddress={(a) => {
+                setCheckoutName(a.name);
+                setCheckoutPhone(a.phone);
+                setCheckoutAddress(a.line);
+              }}
+              onSignIn={() => {
+                setCheckout(false);
+                setShowAuth(true, "login");
+              }}
+              onSubmit={() => {
+                const ok = placeOrder({
+                  customerName: checkoutName,
+                  address: checkoutAddress,
+                  phone: checkoutPhone,
+                  paymentMethod,
+                  guestEmail: checkoutEmail,
+                  saveAddress,
+                });
+                if (ok) {
+                  window.setTimeout(() => setOrderOk(false), 4000);
+                }
+              }}
+            />
+          </Overlay>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSearch && (
+          <Overlay onClose={() => setShowSearch(false)}>
+            <h3>Search {config.brandName}</h3>
+            <label>
+              Find products
+              <input
+                autoFocus
+                value={searchQ}
+                onChange={(e) => setSearchQ(e.target.value)}
+                placeholder="Try yoga mat, under 3000, best rated…"
+              />
+            </label>
+            <div className="orva-smart-chips">
+              {["under 3000", "best rated", "fashion", "electronics", "luxury"].map((chip) => (
+                <button type="button" key={chip} onClick={() => setSearchQ(chip)}>
+                  {chip}
                 </button>
+              ))}
+            </div>
+            {!searchQ.trim() && recent.length > 0 && (
+              <>
+                <p className="muted">Recently viewed</p>
+                <div className="suggest-grid">
+                  {recent.slice(0, 4).map((p) => (
+                    <button
+                      type="button"
+                      key={p.id}
+                      className="suggest-card"
+                      onClick={() => openProduct(p)}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={p.image} alt="" />
+                      <strong>{p.name}</strong>
+                      <span>{money(p.price)}</span>
+                    </button>
+                  ))}
+                </div>
               </>
+            )}
+            {searchQ.trim() && searchHits.length === 0 && (
+              <p className="muted">No matches. Try another word.</p>
+            )}
+            {searchHits.length > 0 && (
+              <div className="search-hits">
+                {searchHits.map((p) => (
+                  <button
+                    type="button"
+                    key={p.id}
+                    className="search-hit"
+                    onClick={() => openProduct(p)}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.image} alt="" />
+                    <span>
+                      <strong>{p.name}</strong>
+                      <small>
+                        {p.category} · {p.subcategory}
+                      </small>
+                    </span>
+                    <em>{money(p.price)}</em>
+                  </button>
+                ))}
+              </div>
+            )}
+          </Overlay>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showWishlist && (
+          <Overlay onClose={() => setShowWishlist(false)}>
+            <h3>Saved items</h3>
+            {wishlist.length === 0 ? (
+              <p className="muted">Nothing saved yet. Tap ♥ on a product to keep it here.</p>
+            ) : (
+              <div className="search-hits">
+                {wishlist.map((p) => (
+                  <button
+                    type="button"
+                    key={p.id}
+                    className="search-hit"
+                    onClick={() => openProduct(p)}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.image} alt="" />
+                    <span>
+                      <strong>{p.name}</strong>
+                      <small>Tap to view</small>
+                    </span>
+                    <em>{money(p.price)}</em>
+                  </button>
+                ))}
+              </div>
             )}
           </Overlay>
         )}
@@ -550,37 +1032,69 @@ export function VirtualMallExperience() {
 
       <AnimatePresence>
         {showOrders && (
-          <Overlay onClose={() => setShowOrders(false)}>
-            <h3>Order history</h3>
-            {!liveSession ? (
-              <p className="muted">Sign in to view your order history.</p>
+          <Overlay onClose={() => { setShowOrders(false); setTrackingOrderId(null); }}>
+            <h3>Orders & tracking</h3>
+            {!liveSession && myOrders.length === 0 ? (
+              <p className="muted">
+                No guest orders yet. Place an order with guest checkout, or{" "}
+                <button type="button" className="linkish" onClick={() => setShowAuth(true, "login")}>
+                  sign in
+                </button>
+                .
+              </p>
             ) : myOrders.length === 0 ? (
               <p className="muted">No orders yet.</p>
             ) : (
               <div className="order-list">
                 {myOrders.map((o) => (
-                  <article key={o.id} className="order-card">
-                    <header>
-                      <strong>{new Date(o.createdAt).toLocaleString()}</strong>
-                      <span>₹{o.total.toLocaleString("en-IN")}</span>
-                    </header>
-                    <p className="muted">
-                      {o.customerName} · {o.address}
-                    </p>
-                    <ul>
-                      {o.items.map((it) => (
-                        <li key={`${o.id}-${it.id}`}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={it.image} alt="" />
-                          <span>{it.name}</span>
-                          <em>₹{it.price.toLocaleString("en-IN")}</em>
-                        </li>
-                      ))}
-                    </ul>
-                  </article>
+                  <OrderCard
+                    key={o.id}
+                    order={o}
+                    money={money}
+                    onAdvance={() => advanceOrderStatus(o.id)}
+                    onReorder={() => runReorder(o.id)}
+                  />
                 ))}
               </div>
             )}
+          </Overlay>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {helpSection && (
+          <Overlay onClose={() => setHelpSection(null)}>
+            <h3>Help center</h3>
+            <div className="help-tabs">
+              {HELP_SECTIONS.map((s) => (
+                <button
+                  type="button"
+                  key={s.id}
+                  className={helpSection === s.id ? "on" : ""}
+                  onClick={() => setHelpSection(s.id)}
+                >
+                  {s.title}
+                </button>
+              ))}
+            </div>
+            {HELP_SECTIONS.filter((s) => s.id === helpSection).map((s) => (
+              <div key={s.id} className="help-body">
+                <h4>{s.title}</h4>
+                {s.body.map((line) => (
+                  <p key={line} className="muted">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            ))}
+            <div className="row">
+              <button type="button" className="primary" onClick={() => { setHelpSection(null); goShop(); }}>
+                Shop now
+              </button>
+              <button type="button" onClick={() => { setHelpSection(null); goDirectory(); }}>
+                Directory
+              </button>
+            </div>
           </Overlay>
         )}
       </AnimatePresence>
@@ -591,17 +1105,66 @@ export function VirtualMallExperience() {
             <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }}>
               <span>✓</span>
               <h2>Order confirmed</h2>
-              <p className="muted">Saved to your order history</p>
+              <p className="muted">
+                {lastOrderId ? `Order ${lastOrderId}` : "Saved"} · tracking is ready
+              </p>
+              <div className="row" style={{ justifyContent: "center", marginTop: "0.75rem" }}>
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={() => {
+                    setOrderOk(false);
+                    goShop();
+                  }}
+                >
+                  Continue shopping
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOrderOk(false);
+                    if (lastOrderId) setTrackingOrderId(lastOrderId);
+                    setShowOrders(true);
+                  }}
+                >
+                  Track order
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <CartNudge />
+      <CartToast
+        onOpenBag={() => setShowBag(true)}
+        onCheckout={() => {
+          setShowBag(false);
+          setCheckout(true);
+        }}
+      />
+      <CompareTray
+        onOpen={(p) => {
+          openProduct(p, phase === "shop" || !started ? "shop" : returnPhase);
+        }}
+      />
+      {started && phase !== "product" && phase !== "store" && <MobileStickyBag onShop={goShop} />}
+      {started && (phase === "floors" || phase === "lobby") && (
+        <SkipToShop onShop={goShop} />
+      )}
     </div>
   );
 }
 
 function Intro({
-  onEnter,
+  config,
+  onExplore,
+  onShop,
+  onDirectory,
+  onHelp,
+  onOpenFloor,
+  floors,
+  boutiques,
   bagCount,
   onBag,
   sessionName,
@@ -609,8 +1172,18 @@ function Intro({
   onOrders,
   orderCount,
   onLogout,
+  onSearch,
+  onWishlist,
+  wishCount,
 }: {
-  onEnter: () => void;
+  config: MallSiteConfig;
+  onExplore: () => void;
+  onShop: () => void;
+  onDirectory: () => void;
+  onHelp: (section?: string) => void;
+  onOpenFloor: (index: number) => void;
+  floors: { label: string; title: string; categoryName: string; hero: string; storeCount?: number }[];
+  boutiques: StoreNode[];
   bagCount: number;
   onBag: () => void;
   sessionName: string | null;
@@ -618,179 +1191,94 @@ function Intro({
   onOrders: () => void;
   orderCount: number;
   onLogout: () => void;
+  onSearch: () => void;
+  onWishlist: () => void;
+  wishCount: number;
 }) {
-  return (
-    <section className="lp">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <motion.img
-        className="lp-hero-img"
-        src={landingHeroImage()}
-        alt="MegaMall premium retail destination"
-        initial={{ scale: 1.12 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 2.4, ease: [0.22, 1, 0.36, 1] }}
-      />
-      <div className="lp-veil" />
-
-      <header className="lp-top">
-        <strong>MegaMall</strong>
-        <div className="lp-top-actions">
-          {sessionName ? (
-            <>
-              <button type="button" onClick={onOrders}>
-                Orders ({orderCount})
-              </button>
-              <button type="button" onClick={onLogout}>
-                {sessionName.split(" ")[0]} · Out
-              </button>
-            </>
-          ) : (
-            <>
-              <button type="button" onClick={() => onAuth("login")}>
-                Sign in
-              </button>
-              <button type="button" className="mp-nav-signup" onClick={() => onAuth("signup")}>
-                Join
-              </button>
-            </>
-          )}
-          <button type="button" onClick={onBag}>
-            Cart ({bagCount})
-          </button>
-        </div>
-      </header>
-
-      <div className="lp-copy">
-        <motion.p
-          className="lp-kicker"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-        >
-          Premium retail destination
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        >
-          MegaMall
-        </motion.h1>
-        <motion.p
-          className="lp-lead"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-        >
-          A curated retail destination — browse floors, open stores, and shop featured collections.
-        </motion.p>
-        <motion.div
-          className="lp-cta"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.48 }}
-        >
-          <button type="button" className="primary" onClick={onEnter}>
-            Begin shopping
-          </button>
-        </motion.div>
-      </div>
-
-      <motion.div
-        className="lp-scroll"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.9 }}
-        aria-hidden
-      >
-        <span>Continue to floors</span>
-        <i />
-      </motion.div>
-    </section>
+  const { floors: catalogFloors } = useCatalog();
+  const todayEdit = useMemo(() => suggestProducts(8, [], catalogFloors), [catalogFloors]);
+  const foodPicks = useMemo(
+    () => catalogFloors.flatMap((f) => f.stores.filter((s) => s.category === "food").flatMap((s) => s.products)).slice(0, 4),
+    [catalogFloors],
   );
-}
+  const foodStores = useMemo(
+    () => catalogFloors.flatMap((f) => f.stores.filter((s) => s.category === "food")).slice(0, 6),
+    [catalogFloors],
+  );
+  const addToBag = useMallStore((s) => s.addToBag);
 
-function ProductPage({
-  product,
-  storeName,
-  accent,
-  ink,
-  bg,
-  onBack,
-  onBuy,
-  onBuyNow,
-}: {
-  product: Product;
-  storeName: string;
-  accent: string;
-  ink: string;
-  bg: string;
-  onBack: () => void;
-  onBuy: () => void;
-  onBuyNow: () => void;
-}) {
   return (
-    <motion.section
-      className="pp"
-      style={{ background: bg, color: ink, ["--a" as string]: accent }}
-      initial={{ opacity: 0, scale: 1.08 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.94 }}
-      transition={{ duration: 0.45 }}
-    >
-      <button type="button" className="pp-back" onClick={onBack}>
-        ← Back to collection
-      </button>
-      <div className="pp-hero">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <motion.img
-          src={product.image}
-          alt={product.name}
-          initial={{ scale: 1.2 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.7 }}
-        />
-      </div>
-      <div className="pp-sheet">
-        <p className="pp-kicker">{storeName}</p>
-        <h1>{product.name}</h1>
-        <p className="pp-copy">{product.description}</p>
-        <ul>
-          <li>
-            <em>Rating</em>
-            <span>{product.rating.toFixed(1)} / 5</span>
-          </li>
-          <li>
-            <em>Colors</em>
-            <span>{product.colors.join(" · ")}</span>
-          </li>
-          <li>
-            <em>Sizes</em>
-            <span>{product.sizes.join(" / ")}</span>
-          </li>
-        </ul>
-        <p className="pp-price">₹{product.price.toLocaleString("en-IN")}</p>
-        <div className="pp-actions">
-          <button type="button" className="primary" onClick={onBuyNow}>
-            Buy now
-          </button>
-          <button type="button" onClick={onBuy}>
-            Add to cart
-          </button>
-        </div>
-      </div>
-    </motion.section>
+    <OrvaMarketingHome
+      config={config}
+      floors={floors}
+      boutiques={boutiques}
+      picks={todayEdit}
+      foodPicks={foodPicks}
+      foodStores={foodStores}
+      onShop={() => onShop()}
+      onDirectory={onDirectory}
+      onFloors={onExplore}
+      onFood={onShop}
+      onOpenFloor={onOpenFloor}
+      onOpenStore={() => onDirectory()}
+      onBuyNow={(p) => {
+        addToBag(p);
+        onBag();
+      }}
+      topBar={
+        <header className="orva-land-top">
+          <strong>{config.brandName}</strong>
+          <div className="orva-land-top-actions">
+            <LiveSourceBadge />
+            <button type="button" onClick={onSearch}>
+              Search
+            </button>
+            <button type="button" onClick={onDirectory}>
+              Directory
+            </button>
+            <button type="button" onClick={onWishlist}>
+              Saved{wishCount ? ` (${wishCount})` : ""}
+            </button>
+            {sessionName ? (
+              <>
+                <button type="button" onClick={onOrders}>
+                  Orders ({orderCount})
+                </button>
+                <button type="button" onClick={onLogout}>
+                  {sessionName.split(" ")[0]} · Out
+                </button>
+              </>
+            ) : (
+              <>
+                <button type="button" onClick={() => onAuth("login")}>
+                  Sign in
+                </button>
+                <button type="button" className="mp-nav-signup" onClick={() => onAuth("signup")}>
+                  Join
+                </button>
+              </>
+            )}
+            <button type="button" className="orva-land-top-cart" onClick={onBag}>
+              Cart ({bagCount})
+            </button>
+          </div>
+        </header>
+      }
+      footer={<MallFooter onShop={onShop} onExplore={onExplore} onDirectory={onDirectory} onHelp={onHelp} />}
+    />
   );
 }
 
 function FloorScroll({
   pages,
   floor,
+  brandName = "Orva",
   onFloorChange,
   onEnterLobby,
 }: {
   pages: FloorPage[];
   floor: number;
+  brandName?: string;
   onFloorChange: (n: number) => void;
   onEnterLobby: (floorIndex: number, pic?: string) => void;
 }) {
@@ -870,7 +1358,11 @@ function FloorScroll({
               slideRefs.current[i] = node;
             }}
           >
-            <FloorSlide page={page} onEnterLobby={(pic) => onEnterLobby(i, pic)} />
+            <FloorSlide
+              page={page}
+              brandName={brandName}
+              onEnterLobby={(pic) => onEnterLobby(i, pic)}
+            />
           </div>
         ))}
       </div>
@@ -899,9 +1391,11 @@ function FloorScroll({
 
 function FloorSlide({
   page,
+  brandName = "Orva",
   onEnterLobby,
 }: {
   page: FloorPage;
+  brandName?: string;
   onEnterLobby: (pic?: string) => void;
 }) {
   return (
@@ -932,7 +1426,7 @@ function FloorSlide({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ amount: 0.5, once: false }}
         >
-          MegaMall · Floor {page.label}
+          {brandName} · Floor {page.label}
         </motion.p>
         <motion.h1
           initial={{ opacity: 0, y: 32 }}
@@ -959,7 +1453,11 @@ function FloorSlide({
           transition={{ delay: 0.1 }}
         >
           {page.subcategories.slice(0, 4).map((sub) => (
-            <li key={sub}>{sub}</li>
+            <li key={sub}>
+              <button type="button" onClick={() => onEnterLobby(page.hero)}>
+                {sub}
+              </button>
+            </li>
           ))}
         </motion.ul>
         <motion.div
@@ -1066,43 +1564,62 @@ function FloorLobby({
       </div>
 
       <div className="fl-lobby-stack">
-        <AnimatePresence mode="popLayout">
-          {filtered.map((s, i) => {
-            const fromLeft = i % 2 === 0;
-            return (
-              <motion.button
-                type="button"
-                key={s.id}
-                layout
-                className={`fl-door fl-door-stack ${fromLeft ? "left" : "right"}`}
-                initial={{
-                  opacity: 0,
-                  y: 28,
-                  scale: 0.96,
-                }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ type: "spring", stiffness: 140, damping: 18 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => onOpenStore(s)}
-              >
-                <div className="fl-door-media">
+        {filtered.length === 0 ? (
+          <div className="fl-empty">
+            <p>No stores in {activeSub}.</p>
+            <button type="button" className="primary" onClick={() => setActiveSub("All")}>
+              See all departments
+            </button>
+            <div className="fl-empty-suggest">
+              {page.stores.slice(0, 2).map((s) => (
+                <button type="button" key={s.id} className="suggest-card" onClick={() => onOpenStore(s)}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={s.doorImage} alt="" />
-                  <em style={{ background: s.theme.accent }}>{String(i + 1).padStart(2, "0")}</em>
-                </div>
-                <div className="fl-door-meta">
-                  <span className="fl-door-sub">{s.subcategory}</span>
                   <strong>{s.name}</strong>
-                  <span>
-                    {page.categoryName} · {s.category}
-                  </span>
-                  <small>View collection</small>
-                </div>
-              </motion.button>
-            );
-          })}
-        </AnimatePresence>
+                  <span>{s.subcategory}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            {filtered.map((s, i) => {
+              const fromLeft = i % 2 === 0;
+              return (
+                <motion.button
+                  type="button"
+                  key={s.id}
+                  layout
+                  className={`fl-door fl-door-stack ${fromLeft ? "left" : "right"}`}
+                  initial={{
+                    opacity: 0,
+                    y: 28,
+                    scale: 0.96,
+                  }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 140, damping: 18 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => onOpenStore(s)}
+                >
+                  <div className="fl-door-media">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={s.doorImage} alt="" />
+                    <em style={{ background: s.theme.accent }}>{String(i + 1).padStart(2, "0")}</em>
+                  </div>
+                  <div className="fl-door-meta">
+                    <span className="fl-door-sub">{s.subcategory}</span>
+                    <strong>{s.name}</strong>
+                    <span>
+                      {page.categoryName} · {s.category}
+                    </span>
+                    <small>View collection</small>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </AnimatePresence>
+        )}
       </div>
     </motion.section>
   );
