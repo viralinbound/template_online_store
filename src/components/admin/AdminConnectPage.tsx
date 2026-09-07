@@ -5,7 +5,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { useCatalog } from "@/components/CatalogProvider";
 
 type Status = {
-  connect?: { summary: string; steps: string[]; env: string[] };
+  connect?: { summary: string; steps: string[]; env: string[]; schemas?: string[] };
   connector?: { label?: string; mode?: string; detail?: string };
   dataSource?: string;
   products?: number;
@@ -41,12 +41,33 @@ const SAMPLE_INGEST = `{
   "products": [{ "name": "Sample Tee", "price": 999, "category": "fashion" }]
 }`;
 
+const SAMPLE_SHOPIFY = `{
+  "products": [{
+    "title": "Shopify Hoodie",
+    "vendor": "Acme",
+    "product_type": "Apparel",
+    "body_html": "<p>Soft fleece</p>",
+    "handle": "shopify-hoodie",
+    "variants": [{ "price": "49.00", "compare_at_price": "69.00", "sku": "HD-1", "inventory_quantity": 12 }],
+    "images": [{ "src": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800" }]
+  }]
+}`;
+
 export function AdminConnectPage() {
   const { config, refresh } = useCatalog();
   const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [schemaBusy, setSchemaBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [pasteJson, setPasteJson] = useState(SAMPLE_INGEST);
+  const [preview, setPreview] = useState<{
+    schema?: string;
+    products?: number;
+    brand?: string;
+    tip?: string;
+    sample?: { name?: string; price?: number } | null;
+  } | null>(null);
   const [form, setForm] = useState<BrandForm>({
     brandName: config.brandName,
     tagline: config.tagline,
@@ -136,10 +157,41 @@ export function AdminConnectPage() {
     }
   };
 
+  const runSchema = async (mode: "preview" | "ingest") => {
+    setSchemaBusy(true);
+    try {
+      const body = JSON.parse(pasteJson);
+      const res = await fetch(mode === "preview" ? "/api/catalog/preview" : "/api/catalog/ingest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `${mode} failed`);
+      setPreview({
+        schema: data.schema,
+        products: data.products,
+        brand: data.brand,
+        tip: data.tip || data.message,
+        sample: data.sample ?? null,
+      });
+      if (mode === "ingest") {
+        refresh();
+        flash(data.message || "Catalog live");
+      } else {
+        flash(`Schema: ${data.schema} · ${data.products} products`);
+      }
+    } catch (e) {
+      flash(e instanceof Error ? e.message : "Invalid JSON or request failed");
+    } finally {
+      setSchemaBusy(false);
+    }
+  };
+
   return (
     <AdminShell
       title="Connect backend"
-      lead="Plug any company SQL, NoSQL, HTTP, or JSON feed — brand, logo, and colors update the full website automatically."
+      lead="Any ecommerce schema — Shopify, Woo, Magento, SQL, Mongo, custom REST — maps into a full live website automatically."
     >
       <div className="admin-top-actions" style={{ marginBottom: "1rem" }}>
         <button type="button" className="primary" disabled={busy} onClick={() => void load()}>
@@ -151,8 +203,64 @@ export function AdminConnectPage() {
         <button type="button" className="ghost" onClick={() => void copy(SAMPLE_INGEST, "sample JSON")}>
           Copy sample payload
         </button>
+        <button
+          type="button"
+          className="ghost"
+          onClick={() => {
+            setPasteJson(SAMPLE_SHOPIFY);
+            flash("Loaded Shopify sample");
+          }}
+        >
+          Load Shopify sample
+        </button>
       </div>
       {toast && <div className="admin-toast">{toast}</div>}
+
+      <section className="admin-panel admin-connect" style={{ marginBottom: "1rem" }}>
+        <h2>Paste any backend schema</h2>
+        <p className="muted">
+          Drop Shopify / WooCommerce / Magento / SQL export / Mongo documents JSON. Preview first, then go live —
+          products and brand update the whole site.
+        </p>
+        <label className="full" style={{ display: "block", marginTop: "0.75rem" }}>
+          Backend JSON
+          <textarea
+            value={pasteJson}
+            onChange={(e) => setPasteJson(e.target.value)}
+            rows={12}
+            spellCheck={false}
+            style={{
+              width: "100%",
+              fontFamily: "ui-monospace, monospace",
+              fontSize: "0.78rem",
+              marginTop: "0.35rem",
+              padding: "0.75rem",
+              borderRadius: "0.5rem",
+              border: "1px solid color-mix(in oklab, var(--ink) 18%, transparent)",
+              background: "#fff",
+              color: "#0a0a0a",
+              resize: "vertical",
+            }}
+          />
+        </label>
+        <div className="admin-top-actions" style={{ marginTop: "0.85rem" }}>
+          <button type="button" className="ghost" disabled={schemaBusy} onClick={() => void runSchema("preview")}>
+            {schemaBusy ? "Working…" : "Preview schema"}
+          </button>
+          <button type="button" className="primary" disabled={schemaBusy} onClick={() => void runSchema("ingest")}>
+            Go live on website
+          </button>
+        </div>
+        {preview && (
+          <p className="muted" style={{ marginTop: "0.85rem" }}>
+            Detected <strong>{preview.schema}</strong>
+            {preview.products != null ? ` · ${preview.products} products` : ""}
+            {preview.brand ? ` · brand ${preview.brand}` : ""}
+            {preview.sample?.name ? ` · sample “${preview.sample.name}” @ ${preview.sample.price}` : ""}
+            {preview.tip ? ` — ${preview.tip}` : ""}
+          </p>
+        )}
+      </section>
 
       <section className="admin-panel admin-connect" style={{ marginBottom: "1rem" }}>
         <h2>Brand kit · live storefront</h2>
@@ -244,6 +352,18 @@ export function AdminConnectPage() {
             <li key={s}>{s}</li>
           ))}
         </ol>
+        {status?.connect?.schemas?.length ? (
+          <>
+            <h3>Supported schema families</h3>
+            <div className="admin-env">
+              {status.connect.schemas.map((s) => (
+                <span key={s} className="admin-env-chip">
+                  <code>{s}</code>
+                </span>
+              ))}
+            </div>
+          </>
+        ) : null}
         <h3>Environment keys</h3>
         <div className="admin-env">
           {(status?.connect?.env ?? []).map((e) => (
@@ -258,12 +378,8 @@ export function AdminConnectPage() {
           {status?.products != null ? ` · ${status.products} products` : ""}
         </p>
         <p className="muted">
-          APIs: <code>POST /api/catalog/ingest</code> · <code>PATCH /api/admin/brand</code> ·{" "}
-          <code>/api/admin/products</code>
-        </p>
-        <p className="muted">
-          Include <code>config.brandName</code>, <code>logoUrl</code>, and <code>theme</code> in any ingest — the UI
-          restyles itself on the next sync.
+          APIs: <code>POST /api/catalog/preview</code> · <code>POST /api/catalog/ingest</code> ·{" "}
+          <code>PATCH /api/admin/brand</code>
         </p>
       </section>
     </AdminShell>
