@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 type Props = {
   brand: string;
+  logoUrl?: string;
   bagCount: number;
   bagPulse?: boolean;
   compareCount?: number;
@@ -20,6 +21,7 @@ type Props = {
 /** Edge-to-edge studio header — brand + actions (no Mall/Shop/Food/Brands strip) */
 export function OrvaStudioHeader({
   brand,
+  logoUrl,
   bagCount,
   bagPulse,
   compareCount = 0,
@@ -65,12 +67,17 @@ export function OrvaStudioHeader({
 
       <div className="orva-studio-bar">
         <Link href="/" className="orva-studio-brand" aria-label={`${brand} home`}>
-          <motion.span
-            className="orva-studio-mark"
-            aria-hidden
-            animate={motionSafe ? { rotate: [0, 8, -4, 0] } : undefined}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          />
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="" className="orva-studio-logo" />
+          ) : (
+            <motion.span
+              className="orva-studio-mark"
+              aria-hidden
+              animate={motionSafe ? { rotate: [0, 8, -4, 0] } : undefined}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            />
+          )}
           <strong>{brand}</strong>
         </Link>
 

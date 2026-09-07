@@ -324,13 +324,44 @@ function productsToFloors(products: Product[]): MallFloor[] {
 function mergeConfig(raw: unknown, dataSource: MallSiteConfig["dataSource"]): MallSiteConfig {
   const row = asRecord(raw) ?? {};
   const flags = asRecord(pick(row, ["featureFlags", "features"])) ?? {};
+  const themeRaw = asRecord(pick(row, ["theme", "colors", "branding", "brandColors"])) ?? {};
+  const baseTheme = defaultSiteConfig.theme!;
+  const theme = {
+    brand: asString(
+      pick(themeRaw, ["brand", "primary", "primaryColor", "brandColor"]) ??
+        pick(row, ["primaryColor", "brandColor", "primary_color"]),
+      baseTheme.brand,
+    ),
+    brandDeep: asString(
+      pick(themeRaw, ["brandDeep", "primaryDark", "brand_deep"]),
+      baseTheme.brandDeep ?? baseTheme.brand,
+    ),
+    accent: asString(
+      pick(themeRaw, ["accent", "secondary", "accentColor"]) ?? pick(row, ["accentColor", "accent_color"]),
+      baseTheme.accent,
+    ),
+    accent2: asString(pick(themeRaw, ["accent2", "highlight", "sale"]), baseTheme.accent2 ?? "#ff3d5a"),
+    bg: asString(pick(themeRaw, ["bg", "background", "surface"]), baseTheme.bg ?? "#f1f5f8"),
+    ink: asString(pick(themeRaw, ["ink", "text", "foreground"]), baseTheme.ink ?? "#07111f"),
+  };
+
   return {
     ...defaultSiteConfig,
-    brandName: asString(pick(row, ["brandName", "brand", "name", "store_name"]), defaultSiteConfig.brandName),
-    tagline: asString(pick(row, ["tagline", "subtitle", "tag_line"]), defaultSiteConfig.tagline),
+    brandName: asString(pick(row, ["brandName", "brand", "name", "store_name", "company"]), defaultSiteConfig.brandName),
+    tagline: asString(pick(row, ["tagline", "subtitle", "tag_line", "slogan"]), defaultSiteConfig.tagline),
     currency: asString(pick(row, ["currency", "currency_code"]), defaultSiteConfig.currency),
     locale: asString(pick(row, ["locale", "lang"]), defaultSiteConfig.locale),
-    supportEmail: asString(pick(row, ["supportEmail", "email"]), defaultSiteConfig.supportEmail),
+    supportEmail: asString(pick(row, ["supportEmail", "email", "support_email"]), defaultSiteConfig.supportEmail),
+    logoUrl:
+      asString(pick(row, ["logoUrl", "logo", "logo_url", "logoSrc", "brandLogo"]), "") ||
+      defaultSiteConfig.logoUrl,
+    faviconUrl:
+      asString(pick(row, ["faviconUrl", "favicon", "favicon_url", "icon"]), "") ||
+      defaultSiteConfig.faviconUrl,
+    couponCode:
+      asString(pick(row, ["couponCode", "coupon", "promoCode", "promo_code"]), "") ||
+      defaultSiteConfig.couponCode,
+    theme,
     trustPoints: asStringArray(pick(row, ["trustPoints", "trust", "guarantees"])).length
       ? asStringArray(pick(row, ["trustPoints", "trust", "guarantees"]))
       : defaultSiteConfig.trustPoints,
@@ -342,7 +373,7 @@ function mergeConfig(raw: unknown, dataSource: MallSiteConfig["dataSource"]): Ma
       wishlist: flags.wishlist !== false,
       reviews: flags.reviews !== false,
       coupons: flags.coupons !== false,
-      guestCheckout: Boolean(flags.guestCheckout),
+      guestCheckout: flags.guestCheckout !== false,
     },
     dataSource,
   };

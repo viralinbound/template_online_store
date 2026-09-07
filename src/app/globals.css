@@ -3514,8 +3514,18 @@ html {
 }
 
 .mall-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   font-family: var(--font-display), sans-serif;
   font-size: 1.2rem;
+}
+
+.mall-footer-logo {
+  width: 1.35rem;
+  height: 1.35rem;
+  object-fit: contain;
+  border-radius: 0.22rem;
 }
 
 .mall-footer-grid {
@@ -11056,6 +11066,15 @@ button.danger {
     linear-gradient(45deg, var(--accent) 0 42%, transparent 42%);
   background-color: var(--brand);
   box-shadow: 0 0 0 3px rgba(18, 181, 160, 0.2);
+}
+
+.orva-studio-logo {
+  width: 1.65rem;
+  height: 1.65rem;
+  object-fit: contain;
+  border-radius: 0.28rem;
+  display: block;
+  flex-shrink: 0;
 }
 
 .orva-studio-actions {

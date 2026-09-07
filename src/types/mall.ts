@@ -101,12 +101,29 @@ export type MallFeatureFlags = {
   guestCheckout: boolean;
 };
 
+export type MallSiteTheme = {
+  brand: string;
+  brandDeep?: string;
+  accent: string;
+  accent2?: string;
+  bg?: string;
+  ink?: string;
+};
+
 export type MallSiteConfig = {
   brandName: string;
   tagline: string;
   currency: string;
   locale: string;
   supportEmail?: string;
+  /** Company logo URL — header / footer mark */
+  logoUrl?: string;
+  /** Browser tab icon */
+  faviconUrl?: string;
+  /** Optional coupon code shown in UI (demo) */
+  couponCode?: string;
+  /** Brand colors applied as CSS variables across the storefront */
+  theme?: MallSiteTheme;
   trustPoints: string[];
   featureFlags: MallFeatureFlags;
   /** local | api | database | json | sql | nosql — shown in admin/dev only */

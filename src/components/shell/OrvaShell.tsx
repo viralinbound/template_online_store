@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { useCatalog } from "@/components/CatalogProvider";
 import { CartToast } from "@/components/commerce/CartToast";
 import { CartNudge, CompareTray } from "@/components/commerce/ShoppingChrome";
@@ -53,11 +53,24 @@ export function OrvaShell({ children, bare = false }: { children: ReactNode; bar
   }
 
   return (
-    <div className="orva-site orva-site-themed orva-illoca orva-lumen orva-studio">
+    <div
+      className="orva-site orva-site-themed orva-illoca orva-lumen orva-studio"
+      style={
+        {
+          ["--brand" as string]: config.theme?.brand,
+          ["--brand-deep" as string]: config.theme?.brandDeep || config.theme?.brand,
+          ["--accent" as string]: config.theme?.accent,
+          ["--accent-2" as string]: config.theme?.accent2,
+          ["--bg" as string]: config.theme?.bg,
+          ["--ink" as string]: config.theme?.ink,
+        } as CSSProperties
+      }
+    >
       <AmbientField variant="site" />
 
       <OrvaStudioHeader
         brand={config.brandName}
+        logoUrl={config.logoUrl}
         bagCount={count}
         bagPulse={bagPulse}
         compareCount={compareCount}

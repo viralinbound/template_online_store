@@ -64,7 +64,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error(`Catalog ${res.status}`);
     const data = (await res.json()) as CatalogPayload;
-    const fp = `${data.generatedAt}:${data.floors.length}:${data.config.dataSource}`;
+    const fp = `${data.generatedAt}:${data.floors.length}:${data.config.dataSource}:${data.config.brandName}:${data.config.logoUrl ?? ""}:${data.config.theme?.brand ?? ""}:${data.config.theme?.accent ?? ""}`;
     if (fp !== fingerprint.current) {
       fingerprint.current = fp;
       setPayload(data);

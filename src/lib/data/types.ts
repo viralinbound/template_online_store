@@ -1,12 +1,23 @@
 import type { CatalogPayload, MallSiteConfig } from "@/types/mall";
 
-/** Default site config — override via DB / env when connected */
+/** Default site config — override via DB / env / ingest when connected */
 export const defaultSiteConfig: MallSiteConfig = {
   brandName: "Orva",
   tagline: "Modern ecommerce · Beautiful shopping",
   currency: "INR",
   locale: "en-IN",
   supportEmail: "hello@orva.shop",
+  logoUrl: undefined,
+  faviconUrl: undefined,
+  couponCode: "ORVA10",
+  theme: {
+    brand: "#0b3d3a",
+    brandDeep: "#062926",
+    accent: "#12b5a0",
+    accent2: "#ff3d5a",
+    bg: "#f1f5f8",
+    ink: "#07111f",
+  },
   trustPoints: [
     "Fast checkout",
     "2–4 day delivery",

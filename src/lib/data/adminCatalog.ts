@@ -154,3 +154,56 @@ export async function adminDeleteProduct(id: string) {
   const result = await persist(floors, payload.config);
   return { ok: true, path: result.path, generatedAt: result.payload.generatedAt };
 }
+
+export type BrandKitInput = {
+  brandName?: string;
+  tagline?: string;
+  supportEmail?: string;
+  logoUrl?: string;
+  faviconUrl?: string;
+  couponCode?: string;
+  currency?: string;
+  locale?: string;
+  trustPoints?: string[];
+  theme?: {
+    brand?: string;
+    brandDeep?: string;
+    accent?: string;
+    accent2?: string;
+    bg?: string;
+    ink?: string;
+  };
+};
+
+/** Merge brand kit into live catalog config — storefront picks it up on poll */
+export async function adminUpdateBrandKit(input: BrandKitInput) {
+  const payload = await loadCatalog(true);
+  const prev = payload.config;
+  const theme = {
+    ...(prev.theme ?? {}),
+    ...(input.theme ?? {}),
+  };
+  const config: MallSiteConfig = {
+    ...prev,
+    brandName: input.brandName?.trim() || prev.brandName,
+    tagline: input.tagline?.trim() || prev.tagline,
+    supportEmail: input.supportEmail?.trim() || prev.supportEmail,
+    logoUrl: input.logoUrl !== undefined ? input.logoUrl.trim() || undefined : prev.logoUrl,
+    faviconUrl: input.faviconUrl !== undefined ? input.faviconUrl.trim() || undefined : prev.faviconUrl,
+    couponCode: input.couponCode?.trim() || prev.couponCode,
+    currency: input.currency?.trim() || prev.currency,
+    locale: input.locale?.trim() || prev.locale,
+    trustPoints: input.trustPoints?.length ? input.trustPoints : prev.trustPoints,
+    theme: {
+      brand: theme.brand || "#0b3d3a",
+      brandDeep: theme.brandDeep,
+      accent: theme.accent || "#12b5a0",
+      accent2: theme.accent2,
+      bg: theme.bg,
+      ink: theme.ink,
+    },
+  };
+  const floors = deepCloneFloors(payload.floors);
+  const result = await persist(floors, config);
+  return { config: result.payload.config, path: result.path, generatedAt: result.payload.generatedAt };
+}
