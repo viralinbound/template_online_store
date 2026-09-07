@@ -1,6 +1,9 @@
 "use client";
 
+import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
+import { TextReveal } from "@/components/motion/MotionKit";
+import { revealTransition, revealUp } from "@/lib/motion";
 
 type Props = {
   eyebrow: string;
@@ -10,13 +13,30 @@ type Props = {
 };
 
 export function SectionHead({ eyebrow, title, action, className = "" }: Props) {
+  const reduce = useReducedMotion();
+
   return (
-    <header className={`orva-land-head ${className}`.trim()}>
+    <motion.header
+      className={`orva-land-head ${className}`.trim()}
+      variants={revealUp}
+      initial={reduce ? false : "hidden"}
+      whileInView="show"
+      viewport={{ once: true, margin: "-40px" }}
+      transition={revealTransition}
+    >
       <div>
-        <p className="orva-land-eyebrow">{eyebrow}</p>
-        <h2>{title}</h2>
+        <motion.p
+          className="orva-land-eyebrow"
+          initial={reduce ? false : { opacity: 0, x: -12 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.45 }}
+        >
+          {eyebrow}
+        </motion.p>
+        {reduce ? <h2>{title}</h2> : <TextReveal text={title} />}
       </div>
       {action}
-    </header>
+    </motion.header>
   );
 }

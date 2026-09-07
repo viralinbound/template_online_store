@@ -1,5 +1,7 @@
-import { FloorDetailPage } from "@/components/pages/FloorDetailPage";
+"use client";
 
-export default function FloorDetailRoute() {
-  return <FloorDetailPage />;
+import { FloorWorldPage } from "@/components/pages/FloorWorldPage";
+
+export default function FloorSlugRoute() {
+  return <FloorWorldPage />;
 }

@@ -9,6 +9,7 @@ export type MallUser = {
   name: string;
   email: string;
   password: string;
+  role: "customer" | "admin";
 };
 
 export type CartLine = {
@@ -158,6 +159,11 @@ type MallState = {
   }) => boolean;
   advanceOrderStatus: (orderId: string) => void;
   reorder: (orderId: string) => boolean;
+  setUserRole: (userId: string, role: "customer" | "admin") => void;
+  removeUser: (userId: string) => boolean;
+  clearWishlist: () => void;
+  clearRecent: () => void;
+  seedDemoOrder: () => string | null;
   bagCount: () => number;
   bagSubtotal: () => number;
   bagDiscount: () => number;
@@ -165,7 +171,27 @@ type MallState = {
 };
 
 function publicUser(u: MallUser): Omit<MallUser, "password"> {
-  return { id: u.id, name: u.name, email: u.email };
+  return { id: u.id, name: u.name, email: u.email, role: u.role ?? "customer" };
+}
+
+const SEED_USERS: MallUser[] = [
+  {
+    id: "u-admin",
+    name: "Orva Admin",
+    email: "admin@orva.demo",
+    password: "admin123",
+    role: "admin",
+  },
+];
+
+function normalizeUsers(raw: unknown): MallUser[] {
+  const list = Array.isArray(raw) ? (raw as MallUser[]) : [];
+  const mapped = list.map((u) => ({
+    ...u,
+    role: u.role === "admin" ? ("admin" as const) : ("customer" as const),
+  }));
+  const hasAdmin = mapped.some((u) => u.email === "admin@orva.demo");
+  return hasAdmin ? mapped : [...SEED_USERS, ...mapped];
 }
 
 function lineKey(productId: string, size: string, color: string) {
@@ -238,7 +264,7 @@ export const useMallStore = create<MallState>()(
       cartNudgeAt: null,
       cartToast: null,
       activeStoreId: null,
-      users: [],
+      users: SEED_USERS,
       session: null,
       orders: [],
       showAuth: false,
@@ -395,6 +421,7 @@ export const useMallStore = create<MallState>()(
           name: n,
           email: e,
           password: p,
+          role: "customer",
         };
         set((s) => ({
           users: [...s.users, user],
@@ -519,6 +546,96 @@ export const useMallStore = create<MallState>()(
         return true;
       },
 
+      setUserRole: (userId, role) => {
+        set((s) => ({
+          users: s.users.map((u) => (u.id === userId ? { ...u, role } : u)),
+          session:
+            s.session?.id === userId ? { ...s.session, role } : s.session,
+        }));
+      },
+
+      removeUser: (userId) => {
+        const target = get().users.find((u) => u.id === userId);
+        if (!target) return false;
+        if (target.email === "admin@orva.demo") return false;
+        set((s) => ({
+          users: s.users.filter((u) => u.id !== userId),
+          session: s.session?.id === userId ? null : s.session,
+        }));
+        return true;
+      },
+
+      clearWishlist: () => set({ wishlist: [] }),
+      clearRecent: () => set({ recent: [] }),
+
+      seedDemoOrder: () => {
+        const { bag, session, recent, wishlist } = get();
+        const fromBag = bag.map((l) => ({
+          id: l.product.id,
+          name: l.product.name,
+          price: l.product.price,
+          image: l.product.image,
+          qty: l.qty,
+          size: l.size,
+          color: l.color,
+        }));
+        const fallback = recent[0] || wishlist[0];
+        const items =
+          fromBag.length > 0
+            ? fromBag
+            : fallback
+              ? [
+                  {
+                    id: fallback.id,
+                    name: fallback.name,
+                    price: fallback.price,
+                    image: fallback.image,
+                    qty: 1,
+                    size: fallback.sizes?.[0],
+                    color: fallback.colors?.[0],
+                  },
+                ]
+              : [
+                  {
+                    id: "demo-sku",
+                    name: "Demo Merino Overcoat",
+                    price: 1849,
+                    image: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400",
+                    qty: 1,
+                    size: "M",
+                    color: "Noir",
+                  },
+                ];
+        const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
+        const now = new Date().toISOString();
+        const id = `ord-demo-${Date.now()}`;
+        const order: MallOrder = {
+          id,
+          userId: session?.id ?? "guest-demo",
+          guestEmail: session ? undefined : "demo@orva.customer",
+          items,
+          subtotal,
+          discount: 0,
+          total: subtotal,
+          address: "12 Demo Lane, Orva City",
+          phone: "9999900000",
+          customerName: session?.name ?? "Demo Shopper",
+          paymentMethod: "upi",
+          status: "Confirmed",
+          timeline: [
+            {
+              status: "Confirmed",
+              at: now,
+              note: "Seeded from admin · demo order",
+            },
+          ],
+          createdAt: now,
+          eta: etaDaysFromNow(3),
+        };
+        set((s) => ({ orders: [order, ...s.orders] }));
+        return id;
+      },
+
       advanceOrderStatus: (orderId) => {
         set((s) => ({
           orders: s.orders.map((o) => {
@@ -577,9 +694,19 @@ export const useMallStore = create<MallState>()(
       }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<MallState>;
+        const users = normalizeUsers(p.users ?? current.users);
+        const sessionRaw = p.session ?? null;
+        const session = sessionRaw
+          ? {
+              ...sessionRaw,
+              role: sessionRaw.role === "admin" ? ("admin" as const) : ("customer" as const),
+            }
+          : null;
         return {
           ...current,
           ...p,
+          users,
+          session,
           bag: migrateBag(p.bag),
           wishlist: Array.isArray(p.wishlist) ? p.wishlist : [],
           recent: Array.isArray(p.recent) ? p.recent : [],

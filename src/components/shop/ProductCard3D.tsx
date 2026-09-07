@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { QuickLook3D } from "@/components/commerce/QuickLook3D";
 import { ProductBadges } from "@/components/ui/ProductBadges";
 import { ProductPrice } from "@/components/ui/ProductPrice";
 import { StockPill } from "@/components/ui/StockPill";
 import { mediaForColor, productHref } from "@/lib/catalog";
+import { productLayoutId, springSoft } from "@/lib/motion";
 import { useMallStore } from "@/store/useMallStore";
 import type { Product } from "@/types/mall";
 
@@ -15,15 +17,21 @@ type Props = {
   currency?: string;
   locale?: string;
   accent?: string;
+  variant?: "full" | "light";
+  /** Skip tilt + layout morph for dense grids (lag-free) */
+  staticCard?: boolean;
+  /** Called after item is added — use for navigation only */
   onBuyNow?: (p: Product) => void;
 };
 
-/** Shop card with 3D tilt, live color media, and quick-look spin */
+/** Paper 2.5D product card — tilt + morph quick-look */
 export function ProductCard3D({
   product,
   currency = "INR",
   locale = "en-IN",
-  accent = "#14999c",
+  accent = "#163a5f",
+  variant = "full",
+  staticCard = false,
   onBuyNow,
 }: Props) {
   const addToBag = useMallStore((s) => s.addToBag);
@@ -36,32 +44,55 @@ export function ProductCard3D({
 
   const src = mediaForColor(product, color);
   const inCompare = compare.some((x) => x.id === product.id);
+  const light = variant === "light";
+  const amp = light ? 5 : 10;
 
   const onMove = (e: React.MouseEvent) => {
+    if (staticCard) return;
+    if (typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches) return;
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
-    setTilt({ x: (py - 0.5) * -10, y: (px - 0.5) * 12 });
+    setTilt({ x: (py - 0.5) * -amp, y: (px - 0.5) * (amp * 1.15) });
+  };
+
+  const buy = () => {
+    addToBag(product, { color, size: product.sizes[0] });
+    onBuyNow?.(product);
   };
 
   return (
     <>
       <article
         ref={ref}
-        className="pc3d"
+        className={`pc3d pc3d-paper${light ? " pc3d-light" : ""}${staticCard ? " pc3d-static" : ""}`}
         onMouseMove={onMove}
         onMouseLeave={() => setTilt({ x: 0, y: 0 })}
-        style={{
-          transform: `perspective(900px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-        }}
+        style={
+          staticCard
+            ? undefined
+            : {
+                transform: `perspective(900px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+              }
+        }
       >
         <button type="button" className="pc3d-media" onClick={() => setQuick(true)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt={product.name} loading="lazy" key={src} />
+          {staticCard ? (
+            <img src={src} alt={product.name} loading="lazy" />
+          ) : (
+            <motion.img
+              layoutId={productLayoutId(product.id)}
+              src={src}
+              alt={product.name}
+              loading="lazy"
+              key={src}
+              transition={springSoft}
+            />
+          )}
           <ProductBadges badges={product.badges} />
-          <span className="pc3d-3dtag">Quick 3D</span>
+          <span className="pc3d-3dtag">Look</span>
         </button>
         <div className="pc3d-body">
           <p className="pc3d-cat">
@@ -92,7 +123,7 @@ export function ProductCard3D({
 
           <div className="pc3d-actions">
             <button type="button" className="pc3d-view" onClick={() => setQuick(true)}>
-              3D
+              Look
             </button>
             <button
               type="button"
@@ -102,20 +133,10 @@ export function ProductCard3D({
             >
               ⇄
             </button>
-            <button
-              type="button"
-              onClick={() => addToBag(product, { color, size: product.sizes[0] })}
-            >
+            <button type="button" onClick={() => addToBag(product, { color, size: product.sizes[0] })}>
               Add
             </button>
-            <button
-              type="button"
-              className="buy"
-              onClick={() => {
-                addToBag(product, { color, size: product.sizes[0] });
-                onBuyNow?.(product);
-              }}
-            >
+            <button type="button" className="buy" onClick={buy}>
               Buy
             </button>
           </div>

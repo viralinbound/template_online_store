@@ -1,5 +1,7 @@
-import { FloorsPage } from "@/components/pages/FloorsPage";
+"use client";
+
+import { FloorsHubPage } from "@/components/pages/FloorsHubPage";
 
 export default function FloorsRoute() {
-  return <FloorsPage />;
+  return <FloorsHubPage />;
 }

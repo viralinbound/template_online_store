@@ -9,7 +9,6 @@ import {
   ProductQA,
   SizeGuide,
 } from "@/components/commerce/ProductExtras";
-import { ProductSpin3D } from "@/components/commerce/ProductSpin3D";
 import { AtmosphereBand } from "@/components/shell/AtmosphereBand";
 import { OrvaShell } from "@/components/shell/OrvaShell";
 import { SectionHead } from "@/components/shell/SectionHead";
@@ -42,7 +41,6 @@ export function ProductDetailPage() {
   const [size, setSize] = useState("One size");
   const [color, setColor] = useState("Default");
   const [qty, setQty] = useState(1);
-  const [mode, setMode] = useState<"photos" | "3d">("photos");
 
   useEffect(() => {
     if (!product) return;
@@ -50,7 +48,6 @@ export function ProductDetailPage() {
     setSize(product.sizes[0] ?? "One size");
     setColor(product.colors[0] ?? "Default");
     setShot(0);
-    setMode("photos");
   }, [product, pushRecent]);
 
   useEffect(() => {
@@ -82,58 +79,32 @@ export function ProductDetailPage() {
           product.name,
           product.category,
           storeMeta?.store.name ?? config.brandName,
-          "3D spin",
+          "Quick look",
           "Buy now",
         ]}
       />
       <section className="pdp-page orva-pdp-themed">
         <div className="pdp-media">
-          <div className="pp-mode-bar pdp-mode">
-            <button
-              type="button"
-              className={mode === "photos" ? "on" : ""}
-              onClick={() => setMode("photos")}
-            >
-              Photos
-            </button>
-            <button
-              type="button"
-              className={mode === "3d" ? "on" : ""}
-              onClick={() => setMode("3d")}
-            >
-              3D spin
-            </button>
+          <div className="pdp-photo">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={activeSrc} alt={product.name} />
+            <ProductBadges badges={product.badges} />
+            {gallery.length > 1 && (
+              <div className="pp-thumbs">
+                {gallery.map((src, i) => (
+                  <button
+                    type="button"
+                    key={src + i}
+                    className={shot === i ? "on" : ""}
+                    onClick={() => setShot(i)}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          {mode === "3d" ? (
-            <div className="pdp-3d">
-              <ProductSpin3D
-                src={activeSrc}
-                accent={storeMeta?.store.theme.accent ?? "#14999c"}
-                onExit={() => setMode("photos")}
-              />
-            </div>
-          ) : (
-            <div className="pdp-photo">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={activeSrc} alt={product.name} />
-              <ProductBadges badges={product.badges} />
-              {gallery.length > 1 && (
-                <div className="pp-thumbs">
-                  {gallery.map((src, i) => (
-                    <button
-                      type="button"
-                      key={src + i}
-                      className={shot === i ? "on" : ""}
-                      onClick={() => setShot(i)}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={src} alt="" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         <div className="pdp-info">

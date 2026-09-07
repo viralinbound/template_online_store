@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ProductSpin3D } from "@/components/commerce/ProductSpin3D";
 import {
   CommerceTrustRow,
   ImageZoom,
@@ -79,7 +78,6 @@ export function ProductPage({
   const [size, setSize] = useState(product.sizes[0] ?? "One size");
   const [color, setColor] = useState(product.colors[0] ?? "Default");
   const [qty, setQty] = useState(1);
-  const [mode, setMode] = useState<"photos" | "3d">("photos");
   const [viewers, setViewers] = useState(8 + (product.id.length % 17));
   const [pulse, setPulse] = useState<string | null>(null);
 
@@ -101,7 +99,6 @@ export function ProductPage({
     setSize(product.sizes[0] ?? "One size");
     setColor(product.colors[0] ?? "Default");
     setShot(0);
-    setMode("photos");
     setQty(1);
   }, [product.id, product.sizes, product.colors]);
 
@@ -129,70 +126,40 @@ export function ProductPage({
       </button>
 
       <div className="pp-stage">
-        <div className="pp-mode-bar" role="tablist" aria-label="Product view">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === "photos"}
-            className={mode === "photos" ? "on" : ""}
-            onClick={() => setMode("photos")}
-          >
-            Photos
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === "3d"}
-            className={mode === "3d" ? "on" : ""}
-            onClick={() => setMode("3d")}
-          >
-            3D spin
-          </button>
+        <div className="pp-mode-bar" aria-label="Live viewing">
           <span className="pp-viewers">
             <i /> {viewers} viewing now
           </span>
         </div>
 
         <AnimatePresence mode="wait">
-          {mode === "3d" ? (
-            <motion.div
-              key="3d"
-              className="pp-hero pp-hero-3d"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <ProductSpin3D src={activeSrc} accent={accent} onExit={() => setMode("photos")} />
-            </motion.div>
-          ) : (
-            <motion.div
-              key={`photo-${activeSrc}-${color}`}
-              className="pp-hero"
-              initial={{ opacity: 0.6, scale: 1.03 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.35 }}
-              style={{ filter: colorFilter(color) }}
-            >
-              <ImageZoom src={activeSrc} alt={`${product.name} · ${color}`} />
-              <ProductBadges badges={product.badges} />
-              {gallery.length > 1 && (
-                <div className="pp-thumbs">
-                  {gallery.map((src, i) => (
-                    <button
-                      type="button"
-                      key={`${product.id}-g-${i}`}
-                      className={shot === i ? "on" : ""}
-                      onClick={() => setShot(i)}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={src} alt="" style={{ filter: colorFilter(color) }} />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          )}
+          <motion.div
+            key={`photo-${activeSrc}-${color}`}
+            className="pp-hero"
+            initial={{ opacity: 0.6, scale: 1.03 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+            style={{ filter: colorFilter(color) }}
+          >
+            <ImageZoom src={activeSrc} alt={`${product.name} · ${color}`} />
+            <ProductBadges badges={product.badges} />
+            {gallery.length > 1 && (
+              <div className="pp-thumbs">
+                {gallery.map((src, i) => (
+                  <button
+                    type="button"
+                    key={`${product.id}-g-${i}`}
+                    className={shot === i ? "on" : ""}
+                    onClick={() => setShot(i)}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" style={{ filter: colorFilter(color) }} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </motion.div>
         </AnimatePresence>
 
         <AnimatePresence>

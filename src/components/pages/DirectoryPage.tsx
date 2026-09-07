@@ -7,112 +7,103 @@ import { AtmosphereBand } from "@/components/shell/AtmosphereBand";
 import { OrvaShell } from "@/components/shell/OrvaShell";
 import { PageHero } from "@/components/shell/PageHero";
 import { SectionHead } from "@/components/shell/SectionHead";
-import { floorSlug, storeHref } from "@/lib/catalog";
+import { storeHref } from "@/lib/catalog";
 import { landingHeroImage } from "@/lib/images";
 
 export function DirectoryPage() {
   const { floors, config } = useCatalog();
   const [q, setQ] = useState("");
-  const [floorFilter, setFloorFilter] = useState<string | "all">("all");
+  const [catFilter, setCatFilter] = useState<string | "all">("all");
 
-  const rows = useMemo(() => {
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    floors.forEach((f) => f.stores.forEach((s) => set.add(s.category)));
+    return [...set].sort();
+  }, [floors]);
+
+  const stores = useMemo(() => {
     const query = q.trim().toLowerCase();
     return floors
-      .filter((f) => floorFilter === "all" || f.id === floorFilter)
-      .map((f) => {
-        const stores = f.stores.filter((s) => {
-          if (!query) return true;
-          return (
-            s.name.toLowerCase().includes(query) ||
-            s.subcategory.toLowerCase().includes(query) ||
-            s.category.toLowerCase().includes(query) ||
-            f.title.toLowerCase().includes(query)
-          );
-        });
-        return { floor: f, stores };
-      })
-      .filter((r) => r.stores.length > 0 || !query);
-  }, [floors, q, floorFilter]);
+      .flatMap((f) => f.stores.map((s) => ({ store: s, group: f.title })))
+      .filter(({ store }) => {
+        if (catFilter !== "all" && store.category !== catFilter) return false;
+        if (!query) return true;
+        return (
+          store.name.toLowerCase().includes(query) ||
+          store.subcategory.toLowerCase().includes(query) ||
+          store.category.toLowerCase().includes(query)
+        );
+      });
+  }, [floors, q, catFilter]);
 
   return (
     <OrvaShell>
       <PageHero
-        kicker="Mall map · pages"
-        title="Directory"
-        lead="Find every boutique as a normal page — then open it from the floor journey."
+        kicker="Brands"
+        title="Brand directory"
+        lead="Find every brand and boutique — open a store to shop its collection."
         image={landingHeroImage()}
         actions={
           <>
-            <Link href="/food" className="ghost">
-              Food Court
-            </Link>
-            <Link href="/floors" className="ghost">
-              Mall floors
-            </Link>
-            <Link href="/shop" className="ghost">
+            <Link href="/shop" className="primary">
               Shop all
+            </Link>
+            <Link href="/food" className="ghost">
+              Food
             </Link>
           </>
         }
       />
-      <AtmosphereBand items={[config.brandName, "Directory", "Floors", "Food Court", "Shop"]} />
+      <AtmosphereBand items={[config.brandName, "Brands", "Shop", "Food", "Checkout"]} />
 
       <section className="orva-land-block">
-        <SectionHead eyebrow="Find" title="Every boutique" />
+        <SectionHead eyebrow="Find" title={`${stores.length} brands`} />
         <div className="dir-tools">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder={`Search ${config.brandName} boutiques…`}
+            placeholder={`Search ${config.brandName} brands…`}
           />
           <div className="dest-cats">
             <button
               type="button"
-              className={floorFilter === "all" ? "on" : ""}
-              onClick={() => setFloorFilter("all")}
+              className={catFilter === "all" ? "on" : ""}
+              onClick={() => setCatFilter("all")}
             >
-              All floors
+              All
             </button>
-            {floors.map((f) => (
+            {categories.map((c) => (
               <button
                 type="button"
-                key={f.id}
-                className={floorFilter === f.id ? "on" : ""}
-                onClick={() => setFloorFilter(f.id)}
+                key={c}
+                className={catFilter === c ? "on" : ""}
+                onClick={() => setCatFilter(c)}
               >
-                {f.label}
+                {c}
               </button>
             ))}
           </div>
         </div>
 
-        {rows.map(({ floor, stores }) => (
-          <div key={floor.id} className="dir-floor-block">
-            <header>
-              <h2>
-                Floor {floor.label} · {floor.title}
-              </h2>
-              <Link href={`/floors/${floorSlug(floor)}`}>Open floor →</Link>
-            </header>
-            <div className="orva-land-boutiques">
-              {stores.map((s) => (
-                <Link
-                  key={s.id}
-                  href={storeHref(s)}
-                  className="orva-land-boutique"
-                  style={{ ["--a" as string]: s.theme.accent }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.doorImage} alt="" />
-                  <span>
-                    <strong>{s.name}</strong>
-                    <small>{s.subcategory}</small>
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        ))}
+        <div className="orva-land-boutiques">
+          {stores.map(({ store }) => (
+            <Link
+              key={store.id}
+              href={storeHref(store)}
+              className="orva-land-boutique"
+              style={{ ["--a" as string]: store.theme.accent }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={store.doorImage} alt="" />
+              <span>
+                <strong>{store.name}</strong>
+                <small>
+                  {store.subcategory} · {store.category}
+                </small>
+              </span>
+            </Link>
+          ))}
+        </div>
       </section>
     </OrvaShell>
   );

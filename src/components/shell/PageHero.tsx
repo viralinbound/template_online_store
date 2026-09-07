@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { duration, easeOut } from "@/lib/motion";
 
 type Props = {
   kicker: string;
@@ -12,6 +13,8 @@ type Props = {
   size?: "compact" | "tall";
   children?: ReactNode;
   actions?: ReactNode;
+  /** Shared morph from BoutiqueDoorCorridor */
+  layoutId?: string;
 };
 
 /** Cinematic page hero — same DNA as explore landing */
@@ -23,27 +26,35 @@ export function PageHero({
   size = "compact",
   children,
   actions,
+  layoutId,
 }: Props) {
+  const reduce = useReducedMotion();
+
   return (
     <section className={`orva-page-hero ${size}`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <motion.img
         className="orva-page-hero-img"
         src={image}
         alt=""
-        initial={{ scale: 1.08 }}
+        layoutId={layoutId}
+        initial={reduce || layoutId ? false : { scale: 1.08 }}
         animate={{ scale: 1 }}
-        transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: duration.cinematic, ease: easeOut }}
       />
       <div className="orva-page-hero-veil" />
       <div className="orva-page-hero-grain" aria-hidden />
-      <div className="orva-page-hero-copy">
+      <motion.div
+        className="orva-page-hero-copy"
+        initial={reduce ? false : { opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: duration.slow, ease: easeOut, delay: 0.08 }}
+      >
         <p className="orva-land-kicker">{kicker}</p>
         <h1>{title}</h1>
         {lead && <p className="orva-page-hero-lead">{lead}</p>}
         {actions && <div className="orva-land-cta">{actions}</div>}
         {children}
-      </div>
+      </motion.div>
     </section>
   );
 }

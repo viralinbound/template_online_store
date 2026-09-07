@@ -28,9 +28,9 @@ export function FadeUp({
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0, y: 48, filter: "blur(10px)" }}
-      animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : undefined}
-      transition={{ duration: 0.8, delay, ease: easeOut }}
+      initial={{ opacity: 0, y: 18 }}
+      animate={inView ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 0.4, delay, ease: easeOut }}
     >
       {children}
     </motion.div>
@@ -56,7 +56,7 @@ export function Stagger({
       animate={inView ? "show" : "hidden"}
       variants={{
         hidden: {},
-        show: { transition: { staggerChildren: 0.08, delayChildren: delay } },
+        show: { transition: { staggerChildren: 0.04, delayChildren: delay } },
       }}
     >
       {children}
@@ -75,12 +75,11 @@ export function StaggerItem({
     <motion.div
       className={className}
       variants={{
-        hidden: { opacity: 0, y: 36, scale: 0.96 },
+        hidden: { opacity: 0, y: 14 },
         show: {
           opacity: 1,
           y: 0,
-          scale: 1,
-          transition: { duration: 0.65, ease: easeOut },
+          transition: { duration: 0.35, ease: easeOut },
         },
       }}
     >
@@ -96,28 +95,7 @@ export function Magnetic({
   children: ReactNode;
   className?: string;
 }) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 220, damping: 18 });
-  const sy = useSpring(y, { stiffness: 220, damping: 18 });
-
-  return (
-    <motion.div
-      className={className}
-      style={{ x: sx, y: sy }}
-      onMouseMove={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        x.set((e.clientX - rect.left - rect.width / 2) * 0.22);
-        y.set((e.clientY - rect.top - rect.height / 2) * 0.22);
-      }}
-      onMouseLeave={() => {
-        x.set(0);
-        y.set(0);
-      }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }
 
 export function TiltCard({
@@ -258,3 +236,73 @@ export function ScrollProgress({ progress }: { progress: MotionValue<number> }) 
   const scaleX = useSpring(progress, { stiffness: 120, damping: 30 });
   return <motion.div className="scroll-progress" style={{ scaleX }} />;
 }
+
+/** Pressable CTA with spring + optional pulse ring for conversion */
+export function MotionCTA({
+  children,
+  className = "",
+  pulse = false,
+  as = "div",
+}: {
+  children: ReactNode;
+  className?: string;
+  pulse?: boolean;
+  as?: "div" | "span";
+}) {
+  const Tag = as === "span" ? motion.span : motion.div;
+  return (
+    <Tag
+      className={`motion-cta${pulse ? " pulse" : ""} ${className}`.trim()}
+      whileHover={{ scale: 1.035, y: -2 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: "spring", stiffness: 420, damping: 24 }}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+/** Soft lift + fade for cards / steps entering view */
+export function RevealCard({
+  children,
+  className = "",
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.2 });
+  return (
+    <motion.div
+      ref={ref}
+      className={`reveal-card ${className}`.trim()}
+      initial={{ opacity: 0, y: 16 }}
+      animate={inView ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 0.4, delay, ease: easeOut }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/** Hover lift for interactive product / promise tiles */
+export function HoverLift({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      className={`hover-lift ${className}`.trim()}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.2, ease: easeOut }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+

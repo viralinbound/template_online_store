@@ -48,7 +48,7 @@ export function SearchPage() {
           </form>
         }
       />
-      <AtmosphereBand items={["Search", "Shop", "Food Court", "Mall floors", config.brandName]} />
+      <AtmosphereBand items={["Search", "Shop", "Food", "Brands", config.brandName]} />
 
       <section className="orva-land-block">
         <SectionHead

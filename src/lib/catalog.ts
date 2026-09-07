@@ -170,7 +170,11 @@ export function slugifyPath(value: string): string {
 }
 
 export function floorSlug(floor: MallFloor): string {
-  return floor.id || slugifyPath(floor.title);
+  return slugifyPath(floor.title) || floor.id;
+}
+
+export function floorHref(floor: MallFloor): string {
+  return `/floors/${floorSlug(floor)}`;
 }
 
 export function findFloorBySlug(slug: string, floors?: MallFloor[]) {
@@ -319,8 +323,8 @@ export const HOW_IT_WORKS = [
   },
   {
     step: "02",
-    title: "Scroll the mall",
-    body: "Ride each floor layout, then enter boutiques on that level.",
+    title: "Build your bag",
+    body: "Save favorites, compare pieces, and keep shopping.",
   },
   {
     step: "03",
@@ -336,8 +340,8 @@ export const CUSTOMER_PROMISES = [
     body: "Search, filter, and add to cart like any top online store.",
   },
   {
-    title: "See it come alive",
-    body: "Explore floors in a light 3D walk — fun, not confusing.",
+    title: "Look before you buy",
+    body: "Quick look, colors, and compare — decide with confidence.",
   },
   {
     title: "Trust every step",

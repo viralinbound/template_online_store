@@ -9,7 +9,8 @@ import { OrvaShell } from "@/components/shell/OrvaShell";
 import { PageHero } from "@/components/shell/PageHero";
 import { SectionHead } from "@/components/shell/SectionHead";
 import { ProductCard3D } from "@/components/shop/ProductCard3D";
-import { EXPERIENCE_ROADMAP, productsByCategory, storeHref } from "@/lib/catalog";
+import { BoutiqueDoorCorridor } from "@/components/shop/BoutiqueDoorCorridor";
+import { EXPERIENCE_ROADMAP, productsByCategory } from "@/lib/catalog";
 import { categoryCollageImage } from "@/lib/images";
 
 export function FoodCourtPage() {
@@ -26,9 +27,9 @@ export function FoodCourtPage() {
   return (
     <OrvaShell>
       <PageHero
-        kicker="Food Court · first-class destination"
-        title="Café heat & atrium sweets"
-        lead="Coffee bars, confectionery, and dessert desks — same tilt cards, quick 3D look, and Buy path as the rest of Orva."
+        kicker="Food · shop category"
+        title="Café heat & kitchen sweets"
+        lead="Coffee, confectionery, and dessert — same cards, quick look, and Buy path as the rest of Orva."
         image={hero}
         size="tall"
         actions={
@@ -36,11 +37,11 @@ export function FoodCourtPage() {
             <Link href="/shop?category=food" className="primary">
               Shop food catalog
             </Link>
-            <Link href="/floors" className="ghost">
-              Mall floors
+            <Link href="/shop" className="ghost">
+              Full shop
             </Link>
             <Link href="/directory" className="ghost">
-              Directory
+              Brands
             </Link>
           </>
         }
@@ -58,33 +59,17 @@ export function FoodCourtPage() {
       />
 
       <section className="orva-land-block">
-        <SectionHead
-          eyebrow="Courts & counters"
-          title="Boutiques on the food promenade"
+        <BoutiqueDoorCorridor
+          stores={stores}
+          variant="light"
+          eyebrow="Cafés & counters"
+          title="Food brands"
           action={
             <Link href="/directory" className="orva-land-link">
-              Full directory →
+              All brands →
             </Link>
           }
         />
-        <div className="orva-land-boutiques">
-          {stores.map((s) => (
-            <Link
-              key={s.id}
-              href={storeHref(s)}
-              className="orva-land-boutique"
-              style={{ ["--a" as string]: s.theme.accent }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={s.doorImage} alt="" />
-              <span>
-                <em>{s.subcategory}</em>
-                <strong>{s.name}</strong>
-                <small>{s.products.length} items</small>
-              </span>
-            </Link>
-          ))}
-        </div>
       </section>
 
       <section className="orva-land-block">

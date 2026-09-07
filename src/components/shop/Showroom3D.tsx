@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { QuickLook3D } from "@/components/commerce/QuickLook3D";
+import { springSoft } from "@/lib/motion";
 import { formatMoney } from "@/lib/money";
 import type { Product } from "@/types/mall";
 
@@ -16,22 +17,20 @@ type Props = {
   onBuyNow?: (p: Product) => void;
 };
 
-/**
- * Immersive 3D showroom rail — scroll/drag products in perspective,
- * click opens a centered 3D quick-look popup.
- */
+/** Lifestyle product rail — cinematic focus, photo quick-look (no 3D engine) */
 export function Showroom3D({
   products,
   currency = "INR",
   locale = "en-IN",
   accent = "#14999c",
   title = "Showroom",
-  eyebrow = "Scroll · 3D stage",
+  eyebrow = "Scroll · lifestyle stage",
   onBuyNow,
 }: Props) {
   const scroller = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const [look, setLook] = useState<Product | null>(null);
+  const reduce = useReducedMotion();
 
   if (!products.length) return null;
 
@@ -62,7 +61,7 @@ export function Showroom3D({
   };
 
   return (
-    <section className="showroom3d" style={{ ["--a" as string]: accent }}>
+    <section className="showroom3d lifestyle-rail runway-shelf" style={{ ["--a" as string]: accent }}>
       <header className="showroom3d-head">
         <div>
           <p className="orva-land-eyebrow">{eyebrow}</p>
@@ -80,32 +79,42 @@ export function Showroom3D({
 
       <div className="showroom3d-stage">
         <div className="showroom3d-glow" aria-hidden />
-        <div className="showroom3d-floor" aria-hidden />
         <div
           ref={scroller}
-          className="showroom3d-rail"
+          className="showroom3d-rail flat-rail"
           onScroll={onScroll}
-          onPointerDown={(e) => {
-            (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-          }}
         >
           {products.map((p, i) => {
             const offset = i - active;
+            const scale = active ? (i === active ? 1.06 : Math.max(0.88, 1 - Math.abs(offset) * 0.05)) : 1;
+            const opacity = Math.max(0.45, 1 - Math.abs(offset) * 0.18);
             return (
-              <ShowroomCard
+              <motion.button
                 key={p.id}
-                product={p}
-                offset={offset}
-                active={i === active}
-                currency={currency}
-                locale={locale}
-                onOpen={() => setLook(p)}
-              />
+                type="button"
+                className={`showroom-card${i === active ? " on" : ""}`}
+                style={{ zIndex: 20 - Math.abs(offset) }}
+                animate={reduce ? undefined : { scale, opacity, y: i === active ? -6 : 0 }}
+                transition={springSoft}
+                onClick={() => setLook(p)}
+              >
+                <span className="showroom-card-media">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.image} alt={p.name} loading="lazy" />
+                  <em>{i === active ? "Quick look" : "Look"}</em>
+                </span>
+                <span className="showroom-card-body">
+                  <strong>{p.name}</strong>
+                  <small>
+                    {formatMoney(p.price, currency, locale)} · ★ {p.rating.toFixed(1)}
+                  </small>
+                </span>
+              </motion.button>
             );
           })}
         </div>
         <p className="showroom3d-hint">
-          Drag / scroll · tap a piece for centered 3D look · {active + 1}/{products.length}
+          Scroll · tap for photo look · {active + 1}/{products.length}
         </p>
       </div>
 
@@ -123,53 +132,5 @@ export function Showroom3D({
         />
       )}
     </section>
-  );
-}
-
-function ShowroomCard({
-  product,
-  offset,
-  active,
-  currency,
-  locale,
-  onOpen,
-}: {
-  product: Product;
-  offset: number;
-  active: boolean;
-  currency: string;
-  locale: string;
-  onOpen: () => void;
-}) {
-  const rotateY = Math.max(-28, Math.min(28, offset * -14));
-  const z = active ? 48 : Math.max(-80, -Math.abs(offset) * 36);
-  const scale = active ? 1.06 : Math.max(0.82, 1 - Math.abs(offset) * 0.08);
-  const opacity = Math.max(0.35, 1 - Math.abs(offset) * 0.22);
-
-  return (
-    <motion.button
-      type="button"
-      className={`showroom-card${active ? " on" : ""}`}
-      style={{
-        transform: `translateZ(${z}px) rotateY(${rotateY}deg) scale(${scale})`,
-        opacity,
-        zIndex: 20 - Math.abs(offset),
-      }}
-      whileHover={{ y: -8 }}
-      transition={{ type: "spring", stiffness: 260, damping: 24 }}
-      onClick={onOpen}
-    >
-      <span className="showroom-card-media">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={product.image} alt={product.name} loading="lazy" />
-        <em>3D look</em>
-      </span>
-      <span className="showroom-card-body">
-        <strong>{product.name}</strong>
-        <small>
-          {formatMoney(product.price, currency, locale)} · ★ {product.rating.toFixed(1)}
-        </small>
-      </span>
-    </motion.button>
   );
 }

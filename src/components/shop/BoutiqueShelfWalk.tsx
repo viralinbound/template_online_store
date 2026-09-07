@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
-import { ProductSpin3D } from "@/components/commerce/ProductSpin3D";
+import { motion } from "framer-motion";
 import { QuickLook3D } from "@/components/commerce/QuickLook3D";
 import { mediaForColor, productHref } from "@/lib/catalog";
 import { useMallStore } from "@/store/useMallStore";
@@ -15,7 +15,7 @@ type Props = {
   onBuyNow?: (p: Product) => void;
 };
 
-/** Optional boutique shelf walk — scroll/drag along products with live 3D focus */
+/** Boutique shelf walk — photo focus stage (no 3D) */
 export function BoutiqueShelfWalk({
   store,
   currency = "INR",
@@ -28,7 +28,7 @@ export function BoutiqueShelfWalk({
   );
   const scroller = useRef<HTMLDivElement>(null);
   const [focus, setFocus] = useState(0);
-  const [walking, setWalking] = useState(false);
+  const [walking, setWalking] = useState(true);
   const [quick, setQuick] = useState<Product | null>(null);
   const addToBag = useMallStore((s) => s.addToBag);
 
@@ -50,15 +50,13 @@ export function BoutiqueShelfWalk({
     <section className="shelf-walk" style={{ ["--a" as string]: accent }}>
       <header>
         <div>
-          <p className="home-kicker">Optional · shelf walk</p>
+          <p className="home-kicker">Shelf walk</p>
           <h2>Walk the shelves</h2>
-          <p className="muted">
-            Scroll the boutique line — focus product spins in 3D. Skip anytime and use the grid below.
-          </p>
+          <p className="muted">Scroll the boutique line — photo focus, quick look, buy.</p>
         </div>
         <div className="shelf-walk-tools">
           <button type="button" className={walking ? "on" : ""} onClick={() => setWalking((v) => !v)}>
-            {walking ? "Hide 3D stage" : "Open 3D stage"}
+            {walking ? "Hide stage" : "Open stage"}
           </button>
           <button type="button" onClick={() => go(-1)} aria-label="Previous shelf">
             ←
@@ -89,23 +87,25 @@ export function BoutiqueShelfWalk({
 
       {walking && active && (
         <div className="shelf-stage">
-          <div className="shelf-stage-3d">
-            <ProductSpin3D
-              src={mediaForColor(active, active.colors[0])}
-              accent={accent}
-              compact
-              onExit={() => setWalking(false)}
-            />
-          </div>
+          <motion.div
+            className="shelf-stage-photo"
+            key={active.id}
+            initial={{ opacity: 0.6, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={mediaForColor(active, active.colors[0])} alt={active.name} />
+          </motion.div>
           <div className="shelf-stage-info">
             <p className="home-kicker">
               Shelf {active.shelfIndex + 1} · {active.subcategory}
             </p>
             <h3>{active.name}</h3>
-            <p className="muted">★ {active.rating.toFixed(1)} · drag to spin</p>
+            <p className="muted">★ {active.rating.toFixed(1)}</p>
             <div className="home-cta">
               <button type="button" className="primary" onClick={() => setQuick(active)}>
-                Quick 3D look
+                Quick look
               </button>
               <button
                 type="button"

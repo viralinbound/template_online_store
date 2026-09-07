@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ProductSpin3D } from "@/components/commerce/ProductSpin3D";
 import { ProductPrice } from "@/components/ui/ProductPrice";
 import { StockPill } from "@/components/ui/StockPill";
 import { mediaForColor, productHref } from "@/lib/catalog";
+import { productLayoutId, springSoft } from "@/lib/motion";
 import { useMallStore } from "@/store/useMallStore";
 import type { Product } from "@/types/mall";
 
@@ -19,7 +19,7 @@ type Props = {
   onBuyNow?: () => void;
 };
 
-/** Quick-look 3D modal — spin + color swap + buy without a full page load */
+/** Center quick-look — photo + color + buy (no 3D) */
 export function QuickLook3D({
   product,
   currency = "INR",
@@ -32,7 +32,6 @@ export function QuickLook3D({
   const toggleCompare = useMallStore((s) => s.toggleCompare);
   const compare = useMallStore((s) => s.compare);
   const [color, setColor] = useState(product.colors[0] ?? "Default");
-  const [mode, setMode] = useState<"3d" | "photo">("3d");
 
   const src = useMemo(() => mediaForColor(product, color), [product, color]);
   const soldOut = product.stock != null && product.stock <= 0;
@@ -60,6 +59,7 @@ export function QuickLook3D({
         role="dialog"
         aria-modal="true"
         aria-label={`Quick look · ${product.name}`}
+        style={{ ["--a" as string]: accent }}
         initial={{ opacity: 0, y: 28, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 16 }}
@@ -70,24 +70,14 @@ export function QuickLook3D({
         </button>
 
         <div className="ql3d-media">
-          <div className="pp-mode-bar ql3d-modes">
-            <button type="button" className={mode === "3d" ? "on" : ""} onClick={() => setMode("3d")}>
-              3D spin
-            </button>
-            <button
-              type="button"
-              className={mode === "photo" ? "on" : ""}
-              onClick={() => setMode("photo")}
-            >
-              Photo
-            </button>
-          </div>
-          {mode === "3d" ? (
-            <ProductSpin3D src={src} accent={accent} compact onExit={() => setMode("photo")} />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={src} alt={product.name} className="ql3d-photo" />
-          )}
+          <motion.img
+            layoutId={productLayoutId(product.id)}
+            key={src}
+            src={src}
+            alt={product.name}
+            className="ql3d-photo"
+            transition={springSoft}
+          />
         </div>
 
         <div className="ql3d-info">

@@ -1,38 +1,43 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { useCatalog } from "@/components/CatalogProvider";
 import { CartToast } from "@/components/commerce/CartToast";
 import { CartNudge, CompareTray } from "@/components/commerce/ShoppingChrome";
 import { MallFooter } from "@/components/MallFooter";
-import { LiveSourceBadge } from "@/components/ui/LiveSourceBadge";
+import { BagFly } from "@/components/commerce/BagFly";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { AmbientField } from "@/components/shell/AmbientField";
+import { OrderEaseDock } from "@/components/shell/OrderEaseDock";
+import { OrvaStudioHeader } from "@/components/shell/OrvaStudioHeader";
+import { PageMotion } from "@/components/shell/PageMotion";
 import { productHref } from "@/lib/catalog";
 import { useMallStore } from "@/store/useMallStore";
 
-const NAV = [
-  { href: "/shop", label: "Shop" },
-  { href: "/food", label: "Food" },
-  { href: "/floors", label: "Mall" },
-  { href: "/directory", label: "Directory" },
-  { href: "/admin", label: "Admin" },
-];
-
 export function OrvaShell({ children, bare = false }: { children: ReactNode; bare?: boolean }) {
-  const pathname = usePathname();
   const router = useRouter();
   const { config } = useCatalog();
   const bagCount = useMallStore((s) => s.bagCount);
-  const wishlist = useMallStore((s) => s.wishlist);
   const compare = useMallStore((s) => s.compare);
   const setShowCompare = useMallStore((s) => s.setShowCompare);
   const session = useMallStore((s) => s.session);
+  const setShowAuth = useMallStore((s) => s.setShowAuth);
+  const logout = useMallStore((s) => s.logout);
   const setShowBag = useMallStore((s) => s.setShowBag);
   const setCheckout = useMallStore((s) => s.setCheckout);
+  const cartToast = useMallStore((s) => s.cartToast);
   const [hydrated, setHydrated] = useState(false);
+  const [bagPulse, setBagPulse] = useState(false);
 
   useEffect(() => setHydrated(true), []);
+  useEffect(() => {
+    if (!cartToast) return;
+    setBagPulse(true);
+    const t = window.setTimeout(() => setBagPulse(false), 650);
+    return () => window.clearTimeout(t);
+  }, [cartToast]);
+
   const count = hydrated ? bagCount() : 0;
   const compareCount = hydrated ? compare.length : 0;
 
@@ -40,75 +45,45 @@ export function OrvaShell({ children, bare = false }: { children: ReactNode; bar
     return (
       <>
         {children}
-        <CartToast
-          onOpenBag={() => router.push("/cart")}
-          onCheckout={() => router.push("/checkout")}
-        />
+        <AuthModal />
+        <CartToast onOpenBag={() => router.push("/cart")} onCheckout={() => router.push("/checkout")} />
         <CartNudge />
       </>
     );
   }
 
   return (
-    <div className="orva-site orva-site-themed">
-      <header className="orva-top orva-top-rich">
-        <Link href="/" className="orva-brand">
-          <strong>{config.brandName}</strong>
-          <span>{config.tagline}</span>
-        </Link>
-        <nav className="orva-nav" aria-label="Main">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={pathname?.startsWith(item.href) ? "on" : ""}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="orva-top-actions">
-          <LiveSourceBadge />
-          <Link href="/search">Search</Link>
-          <Link href="/orders">Orders</Link>
-          <Link href="/help">Help</Link>
-          {session ? (
-            <span className="orva-user">{session.name.split(" ")[0]}</span>
-          ) : (
-            <Link href="/checkout">Join / Guest</Link>
-          )}
-          <Link href="/cart" className="orva-cart-link">
-            Cart {count}
-            {wishlist.length ? ` · ♥${wishlist.length}` : ""}
-          </Link>
-          {compareCount > 0 && (
-            <button
-              type="button"
-              className="orva-compare-btn"
-              onClick={() => setShowCompare(true)}
-            >
-              Compare {compareCount}
-            </button>
-          )}
-        </div>
-      </header>
+    <div className="orva-site orva-site-themed orva-illoca orva-lumen orva-studio">
+      <AmbientField variant="site" />
 
-      <main className="orva-main orva-main-themed">{children}</main>
+      <OrvaStudioHeader
+        brand={config.brandName}
+        bagCount={count}
+        bagPulse={bagPulse}
+        compareCount={compareCount}
+        sessionName={hydrated && session ? session.name.split(" ")[0] : null}
+        isAdmin={hydrated && session?.role === "admin"}
+        onCompare={() => setShowCompare(true)}
+        onSignIn={() => setShowAuth(true, "login")}
+        onSignOut={() => logout()}
+      />
+
+      <main className="orva-main orva-main-themed orva-studio-main">
+        <PageMotion>{children}</PageMotion>
+      </main>
 
       <MallFooter
         onShop={() => router.push("/shop")}
-        onExplore={() => router.push("/floors")}
+        onExplore={() => router.push("/shop")}
         onDirectory={() => router.push("/directory")}
-        onHelp={(section) =>
-          router.push(section ? `/help?section=${section}` : "/help")
-        }
+        onHelp={(section) => router.push(section ? `/help?section=${section}` : "/help")}
+        onOrders={() => router.push("/orders")}
+        onAdmin={() => router.push("/admin")}
       />
 
-      <CompareTray
-        onOpen={(p) => router.push(productHref(p))}
-        onBuyNow={() => router.push("/checkout")}
-      />
-
+      <CompareTray onOpen={(p) => router.push(productHref(p))} onBuyNow={() => router.push("/checkout")} />
+      <BagFly />
+      <AuthModal />
       <CartToast
         onOpenBag={() => {
           setShowBag(false);
@@ -120,6 +95,7 @@ export function OrvaShell({ children, bare = false }: { children: ReactNode; bar
         }}
       />
       <CartNudge />
+      <OrderEaseDock />
     </div>
   );
 }

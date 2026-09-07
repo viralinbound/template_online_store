@@ -1,17 +1,23 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useCatalog } from "@/components/CatalogProvider";
 import { useMallStore } from "@/store/useMallStore";
 
 export function AdminInsightsPage() {
-  const { floors, products } = useCatalog();
+  const { floors, products, refresh } = useCatalog();
   const bag = useMallStore((s) => s.bag);
   const wishlist = useMallStore((s) => s.wishlist);
   const recent = useMallStore((s) => s.recent);
   const compare = useMallStore((s) => s.compare);
+  const clearBag = useMallStore((s) => s.clearBag);
+  const clearWishlist = useMallStore((s) => s.clearWishlist);
+  const clearRecent = useMallStore((s) => s.clearRecent);
+  const clearCompare = useMallStore((s) => s.clearCompare);
   const [hydrated, setHydrated] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   useEffect(() => setHydrated(true), []);
 
   const byCat = useMemo(() => {
@@ -20,8 +26,61 @@ export function AdminInsightsPage() {
     return [...map.entries()].sort((a, b) => b[1] - a[1]);
   }, [products]);
 
+  const flash = (msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 2000);
+  };
+
   return (
     <AdminShell title="Insights" lead="Pulse of catalog depth and shopper signals on this device.">
+      {toast && <div className="admin-toast">{toast}</div>}
+      <div className="admin-top-actions" style={{ marginBottom: "1rem" }}>
+        <button
+          type="button"
+          className="ghost"
+          onClick={() => {
+            refresh();
+            flash("Catalog refreshed");
+          }}
+        >
+          Refresh catalog
+        </button>
+        <button
+          type="button"
+          className="ghost"
+          onClick={() => {
+            clearBag();
+            flash("Bag cleared");
+          }}
+        >
+          Clear bag
+        </button>
+        <button
+          type="button"
+          className="ghost"
+          onClick={() => {
+            clearWishlist();
+            flash("Wishlist cleared");
+          }}
+        >
+          Clear wishlist
+        </button>
+        <button
+          type="button"
+          className="ghost"
+          onClick={() => {
+            clearRecent();
+            clearCompare();
+            flash("Recent + compare cleared");
+          }}
+        >
+          Clear recent
+        </button>
+        <Link href="/shop" className="ghost">
+          Open shop →
+        </Link>
+      </div>
+
       <div className="admin-stats">
         <article>
           <em>Catalog SKUs</em>
@@ -47,7 +106,7 @@ export function AdminInsightsPage() {
           {byCat.map(([cat, n]) => (
             <li key={cat}>
               <span>{cat}</span>
-              <i style={{ width: `${Math.min(100, (n / products.length) * 100)}%` }} />
+              <i style={{ width: `${Math.min(100, (n / Math.max(1, products.length)) * 100)}%` }} />
               <em>{n}</em>
             </li>
           ))}

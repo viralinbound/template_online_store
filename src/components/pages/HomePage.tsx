@@ -5,12 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCatalog } from "@/components/CatalogProvider";
 import { OrvaMarketingHome } from "@/components/pages/OrvaMarketingHome";
 import { OrvaShell } from "@/components/shell/OrvaShell";
-import {
-  floorSlug,
-  productsByCategory,
-  storeHref,
-  suggestProducts,
-} from "@/lib/catalog";
+import { productsByCategory, storeHref, suggestProducts } from "@/lib/catalog";
 
 export function HomePage() {
   const { floors, config, loading } = useCatalog();
@@ -43,6 +38,7 @@ export function HomePage() {
         nestInShell
         config={config}
         floors={floorCards}
+        mallFloors={floors}
         boutiques={boutiques}
         picks={picks}
         foodPicks={foodPicks}
@@ -52,14 +48,10 @@ export function HomePage() {
           router.push(category ? `/shop?category=${category}` : "/shop")
         }
         onDirectory={() => router.push("/directory")}
-        onFloors={() => router.push("/floors")}
         onFood={() => router.push("/food")}
-        onOpenFloor={(i) => {
-          const f = floors[i];
-          if (f) router.push(`/floors/${floorSlug(f)}`);
-        }}
+        onMall={() => router.push("/floors")}
         onOpenStore={(s) => router.push(storeHref(s))}
-        onBuyNow={() => router.push("/checkout")}
+        onBuyNow={() => router.push("/cart")}
       />
     </OrvaShell>
   );

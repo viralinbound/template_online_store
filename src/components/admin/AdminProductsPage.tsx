@@ -52,6 +52,8 @@ export function AdminProductsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [page, setPage] = useState(0);
+  const PAGE = 20;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -89,6 +91,14 @@ export function AdminProductsPage() {
         (p.brand ?? "").toLowerCase().includes(query),
     );
   }, [products, q]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE));
+  const safePage = Math.min(page, pageCount - 1);
+  const paged = filtered.slice(safePage * PAGE, safePage * PAGE + PAGE);
+
+  useEffect(() => {
+    setPage(0);
+  }, [q]);
 
   const openCreate = () => {
     setForm({ ...emptyForm(), storeId: stores[0]?.id ?? "" });
@@ -203,7 +213,7 @@ export function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((p) => (
+                {paged.map((p) => (
                   <tr key={p.id}>
                     <td>
                       <div className="admin-prod">
@@ -235,6 +245,24 @@ export function AdminProductsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        {!loading && filtered.length > PAGE && (
+          <div className="admin-pager">
+            <button type="button" className="ghost" disabled={safePage <= 0} onClick={() => setPage((p) => p - 1)}>
+              ← Prev
+            </button>
+            <span className="muted">
+              Page {safePage + 1} / {pageCount}
+            </span>
+            <button
+              type="button"
+              className="ghost"
+              disabled={safePage >= pageCount - 1}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next →
+            </button>
           </div>
         )}
       </section>

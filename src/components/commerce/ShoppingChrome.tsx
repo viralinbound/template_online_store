@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useMallStore } from "@/store/useMallStore";
 import { formatMoney } from "@/lib/money";
 import { useCatalogOptional } from "@/components/CatalogProvider";
-import { ProductSpin3D } from "@/components/commerce/ProductSpin3D";
 
 /** Reminds shoppers about items left in cart — local demo, no SMS */
 export function CartNudge() {
@@ -97,14 +96,13 @@ export function CompareTray({
   const setShowCompare = useMallStore((s) => s.setShowCompare);
   const addToBag = useMallStore((s) => s.addToBag);
   const catalog = useCatalogOptional();
-  const [spinId, setSpinId] = useState<string | null>(null);
 
   if (!showCompare || compare.length === 0) return null;
 
   return (
-    <div className="orva-compare orva-compare-3d">
+    <div className="orva-compare">
       <header>
-        <strong>Compare 3D ({compare.length}/3)</strong>
+        <strong>Compare ({compare.length}/3)</strong>
         <button type="button" onClick={() => setShowCompare(false)}>
           Hide
         </button>
@@ -113,59 +111,40 @@ export function CompareTray({
         </button>
       </header>
       <div className="orva-compare-row">
-        {compare.map((p) => {
-          const spinning = spinId === p.id;
-          return (
-            <article key={p.id}>
-              <div className="orva-compare-media">
-                {spinning ? (
-                  <ProductSpin3D
-                    src={p.gallery?.[0] ?? p.image}
-                    accent="#14999c"
-                    compact
-                    bare
-                  />
-                ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.image} alt="" />
-                )}
-                <button
-                  type="button"
-                  className="orva-compare-spin"
-                  onClick={() => setSpinId(spinning ? null : p.id)}
-                >
-                  {spinning ? "Photo" : "Mini spin"}
-                </button>
-              </div>
-              <strong>{p.name}</strong>
-              <span>
-                {formatMoney(p.price, catalog?.config.currency ?? p.currency, catalog?.config.locale)}
-              </span>
-              <small>
-                ★ {p.rating.toFixed(1)}
-                {p.colors[0] ? ` · ${p.colors[0]}` : ""}
-              </small>
-              <div>
-                <button type="button" onClick={() => onOpen(p)}>
-                  View
-                </button>
-                <button
-                  type="button"
-                  className="primary"
-                  onClick={() => {
-                    addToBag(p);
-                    onBuyNow?.(p);
-                  }}
-                >
-                  Buy
-                </button>
-                <button type="button" onClick={() => toggleCompare(p)}>
-                  Remove
-                </button>
-              </div>
-            </article>
-          );
-        })}
+        {compare.map((p) => (
+          <article key={p.id}>
+            <div className="orva-compare-media">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.image} alt="" />
+            </div>
+            <strong>{p.name}</strong>
+            <span>
+              {formatMoney(p.price, catalog?.config.currency ?? p.currency, catalog?.config.locale)}
+            </span>
+            <small>
+              ★ {p.rating.toFixed(1)}
+              {p.colors[0] ? ` · ${p.colors[0]}` : ""}
+            </small>
+            <div>
+              <button type="button" onClick={() => onOpen(p)}>
+                View
+              </button>
+              <button
+                type="button"
+                className="primary"
+                onClick={() => {
+                  addToBag(p);
+                  onBuyNow?.(p);
+                }}
+              >
+                Buy
+              </button>
+              <button type="button" onClick={() => toggleCompare(p)}>
+                Remove
+              </button>
+            </div>
+          </article>
+        ))}
       </div>
     </div>
   );

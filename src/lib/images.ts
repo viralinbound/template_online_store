@@ -382,6 +382,48 @@ export function landingHeroImage(): string {
   return LANDING_HERO;
 }
 
+/** Cinematic product / store slides — clean retail stills (no awkward people) */
+export const CINEMATIC_HERO_SLIDES = [
+  {
+    image: u("photo-1441986300917-64674bd600d8", 2400, 1400),
+    label: "SHOP",
+    caption: "Browse the full catalog",
+  },
+  {
+    image: u("photo-1523275335684-37898b6baf30", 2400, 1400),
+    label: "EDIT",
+    caption: "Curated pieces · quick look",
+  },
+  {
+    image: u("photo-1556821840-3a63f95609a7", 2400, 1400),
+    label: "STYLE",
+    caption: "Clean product photography",
+  },
+  {
+    image: u("photo-1542291026-7eec264c27ff", 2400, 1400),
+    label: "BUY",
+    caption: "Bag → checkout in one flow",
+  },
+] as const;
+
+/** Clean product mosaic for atmosphere strip */
+export function lifestylePeoplePool(): string[] {
+  return [
+    u("photo-1523275335684-37898b6baf30", 900, 1200),
+    u("photo-1542291026-7eec264c27ff", 900, 1200),
+    u("photo-1556821840-3a63f95609a7", 900, 1200),
+    u("photo-1542272604-787c3835535d", 900, 1200),
+    u("photo-1571781926291-c477ebfd024b", 900, 1200),
+    u("photo-1541643600914-78b084683601", 900, 1200),
+    u("photo-1496181133206-80ce9b88a853", 900, 1200),
+    u("photo-1511707171634-5f897ff02aa9", 900, 1200),
+  ];
+}
+
+export function lifestylePeopleImage(seed: string): string {
+  return pick(lifestylePeoplePool(), seed);
+}
+
 export function categoryCollageImage(category: string, storeId: string, i: number): string {
   const pool = CATEGORY_POOLS[category] ?? CATEGORY_POOLS.fashion!;
   return pool[(hash(`${storeId}-col`) + i) % pool.length]!;
