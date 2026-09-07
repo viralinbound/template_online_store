@@ -581,15 +581,38 @@
 @media (max-width: 900px) {
   .studio-cine-orbit {
     right: 50%;
-    top: 34%;
-    width: min(70vw, 320px);
+    top: 32%;
+    width: min(62vw, 280px);
     transform: translate(50%, -50%);
-    opacity: 0.9;
+    opacity: 0.88;
   }
 
   .studio-cine-copy {
     max-width: none;
-    padding-top: clamp(16rem, 48vw, 20rem);
+    padding-top: clamp(14rem, 52vw, 19rem);
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .studio-cine-brand {
+    font-size: clamp(2.6rem, 14vw, 4.2rem);
+  }
+
+  .studio-cine-cta {
+    flex-wrap: wrap;
+  }
+
+  .studio-cine-cta .primary {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .studio-cine-chips {
+    flex-wrap: wrap;
+  }
+
+  .studio-cine-chips button {
+    min-height: 40px;
   }
 
   .studio-cine-pin {
@@ -606,6 +629,7 @@
     justify-content: flex-start;
     padding: 0.85rem;
     background: #0a1418;
+    color: #f4fffb;
   }
 
   .spot-reel-stage {
@@ -615,7 +639,26 @@
 
   .spot-reel-frame {
     position: relative;
-    min-height: 420px;
+    min-height: min(58vh, 420px);
+  }
+
+  .expect-band {
+    padding: 2.5rem 1rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .studio-cine-orbit {
+    top: 28%;
+    width: min(58vw, 220px);
+  }
+
+  .studio-cine-copy {
+    padding-top: clamp(12.5rem, 58vw, 16rem);
+  }
+
+  .spot-reel-frame {
+    min-height: 340px;
   }
 }
 

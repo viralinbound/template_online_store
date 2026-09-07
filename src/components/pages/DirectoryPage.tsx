@@ -60,9 +60,14 @@ export function DirectoryPage() {
         <SectionHead eyebrow="Find" title={`${stores.length} brands`} />
         <div className="dir-tools">
           <input
+            type="search"
+            className="orva-search-field"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={`Search ${config.brandName} brands…`}
+            autoComplete="off"
+            enterKeyHint="search"
+            aria-label={`Search ${config.brandName} brands`}
           />
           <div className="dest-cats">
             <button

@@ -2737,10 +2737,16 @@ html {
 .coupon-row input {
   flex: 1 1 140px;
   border: 1px solid var(--line);
-  background: #f4faf9;
+  background: #ffffff;
   border-radius: 0.65rem;
   padding: 0.6rem 0.7rem;
-  color: inherit;
+  color: var(--ink);
+  caret-color: var(--ink);
+}
+
+.coupon-row input::placeholder {
+  color: color-mix(in srgb, var(--ink) 48%, transparent);
+  opacity: 1;
 }
 
 .coupon-row button {
@@ -3634,7 +3640,13 @@ html {
   background: white;
   border-radius: 0.75rem;
   padding: 0.75rem 0.85rem;
-  color: inherit;
+  color: var(--ink);
+  caret-color: var(--ink);
+}
+
+.dir-search input::placeholder {
+  color: color-mix(in srgb, var(--ink) 48%, transparent);
+  opacity: 1;
 }
 
 .dir-floor-pills {
@@ -6543,6 +6555,14 @@ a.ghost {
   border-radius: 0.7rem;
   border: 1px solid var(--line);
   background: #fff;
+  color: var(--ink);
+  caret-color: var(--ink);
+}
+
+.dir-tools input::placeholder,
+.search-form input::placeholder {
+  color: color-mix(in srgb, var(--ink) 48%, transparent);
+  opacity: 1;
 }
 
 .search-form {
@@ -7303,7 +7323,21 @@ a.ghost {
 }
 
 .orva-hero-search input {
-  background: rgba(255, 255, 255, 0.94);
+  background: #ffffff;
+  color: var(--ink);
+  caret-color: var(--brand);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+}
+
+.orva-hero-search input::placeholder {
+  color: color-mix(in srgb, var(--ink) 50%, transparent);
+  opacity: 1;
+}
+
+.orva-hero-search input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .orva-how-grid,
@@ -7937,6 +7971,14 @@ a.ghost {
   padding: 0.65rem 0.85rem;
   border-radius: 0.7rem;
   border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  caret-color: var(--ink);
+}
+
+.admin-toolbar input::placeholder {
+  color: color-mix(in srgb, var(--ink) 48%, transparent);
+  opacity: 1;
 }
 
 .admin-table-wrap {
@@ -8028,9 +8070,17 @@ button.danger {
   font: inherit;
   font-weight: 500;
   color: var(--ink);
+  caret-color: var(--ink);
+  background: #fff;
   padding: 0.55rem 0.65rem;
   border-radius: 0.55rem;
   border: 1px solid var(--line);
+}
+
+.admin-form input::placeholder,
+.admin-form textarea::placeholder {
+  color: color-mix(in srgb, var(--ink) 48%, transparent);
+  opacity: 1;
 }
 
 .admin-connect h2 {
@@ -8639,9 +8689,11 @@ button.danger {
     width: 100%;
   }
 
-  .admin-side nav a {
+  .admin-side nav a,
+  .admin-side nav button {
     padding: 0.4rem 0.7rem;
     font-size: 0.78rem;
+    width: auto;
   }
 
   .admin-side-out {
@@ -11399,6 +11451,13 @@ button.danger {
   padding: 0.7rem 0.85rem;
   font: inherit;
   background: #fff;
+  color: var(--ink);
+  caret-color: var(--ink);
+}
+
+.auth-form input::placeholder {
+  color: color-mix(in srgb, var(--ink) 48%, transparent);
+  opacity: 1;
 }
 
 .auth-err {
@@ -12130,5 +12189,302 @@ button.danger {
   .floor-drill-shop-enter {
     grid-column: 2;
     justify-self: start;
+  }
+}
+
+/* ========== Field contrast + mobile / tablet polish ========== */
+input,
+textarea,
+select {
+  color: var(--ink);
+  caret-color: var(--ink);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--ink) 48%, transparent);
+  opacity: 1;
+}
+
+/* Light fields always use dark ink (even inside dark heroes) */
+.orva-search-field,
+.search-form input,
+.dir-tools input,
+.dir-search input,
+.orva-hero-search input,
+.admin-toolbar input,
+.admin-form input,
+.admin-form textarea,
+.admin-form select,
+.auth-form input,
+.coupon-row input,
+.mp-sheet input,
+.orva-checkout input,
+.orva-checkout textarea,
+.checkout-block input,
+.checkout-block textarea,
+.orva-modal input,
+.orva-modal textarea,
+.orva-modal select {
+  color: var(--ink) !important;
+  caret-color: var(--brand, #0b3d3a) !important;
+  background-color: #ffffff !important;
+}
+
+.orva-search-field::placeholder,
+.search-form input::placeholder,
+.dir-tools input::placeholder,
+.dir-search input::placeholder,
+.orva-hero-search input::placeholder,
+.admin-toolbar input::placeholder,
+.auth-form input::placeholder,
+.coupon-row input::placeholder {
+  color: rgba(7, 17, 31, 0.48) !important;
+  opacity: 1;
+}
+
+/* Dark chrome surfaces keep light text */
+.orva-page-hero,
+.studio-cine,
+.admin-side,
+.admin-gate,
+.floor-immersive,
+.spot-reel-tabs,
+.orva-studio-header.cinematic {
+  color: #f4fffb;
+}
+
+.orva-page-hero .orva-land-kicker,
+.studio-cine-kicker,
+.studio-cine-lead,
+.studio-cine-tag,
+.studio-cine-hint {
+  color: rgba(244, 255, 251, 0.86);
+}
+
+/* Light panels keep dark text */
+.admin-panel,
+.admin-card,
+.admin-main,
+.orva-modal,
+.auth-card,
+.admin-gate-card,
+.pc3d,
+.orva-land-block,
+.mall-ecom-floor-copy,
+.floor-drill,
+.orva-studio-header.solid,
+.orva-studio-header.ghost,
+.orva-studio-panel {
+  color: var(--ink);
+}
+
+.admin-side,
+.admin-side button,
+.admin-side a,
+.admin-side strong,
+.admin-side span {
+  color: inherit;
+}
+
+.admin-side-user strong {
+  color: #f4fffb;
+}
+
+.admin-side-user span {
+  color: rgba(244, 255, 251, 0.62);
+}
+
+/* —— Tablet (portrait + landscape) —— */
+@media (max-width: 1100px) {
+  .orva-studio-bar {
+    width: min(100%, calc(100% - 1.25rem));
+    gap: 0.65rem;
+    padding: 0.7rem 0;
+  }
+
+  .orva-studio-panel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .orva-land-block {
+    width: min(100%, calc(100% - 1.5rem));
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .pc3d-grid,
+  .dense-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .mall-ecom-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workflow-steps,
+  .orva-how-inline,
+  .dense-promises {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .shop-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dest-cats {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .orva-page-hero-copy {
+    padding: 3rem 1rem 1.75rem;
+  }
+
+  .search-form,
+  .orva-hero-search {
+    width: 100%;
+    max-width: none;
+  }
+
+  .search-form input,
+  .orva-hero-search input,
+  .dir-tools input {
+    max-width: none;
+  }
+}
+
+/* —— Phones —— */
+@media (max-width: 720px) {
+  .orva-studio-actions {
+    gap: 0.35rem;
+  }
+
+  .orva-studio-quiet {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.78rem;
+  }
+
+  .orva-studio-bag {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.78rem;
+  }
+
+  .orva-studio-panel-grid {
+    grid-template-columns: 1fr;
+    width: calc(100% - 1rem);
+  }
+
+  .pc3d-grid,
+  .dense-grid,
+  .floor-drill-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .mall-ecom-stack,
+  .workflow-steps,
+  .orva-how-inline,
+  .dense-promises,
+  .orva-land-promises,
+  .admin-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .search-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-form .primary,
+  .orva-hero-search .primary {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .orva-hero-search input,
+  .search-form input,
+  .dir-tools input {
+    min-height: 46px;
+    font-size: 16px; /* prevent iOS zoom */
+  }
+
+  .orva-page-hero {
+    min-height: 220px;
+  }
+
+  .orva-page-hero-copy h1 {
+    font-size: clamp(1.65rem, 8vw, 2.2rem);
+  }
+
+  .orva-land-cta {
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .orva-land-cta .primary,
+  .orva-land-cta .ghost,
+  .orva-land-cta a {
+    min-height: 44px;
+  }
+
+  .admin-top-actions {
+    flex-wrap: wrap;
+  }
+
+  .admin-top-actions .primary,
+  .admin-top-actions .ghost,
+  .admin-top-actions a {
+    min-height: 42px;
+  }
+
+  .admin-table {
+    font-size: 0.82rem;
+  }
+
+  .admin-row-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .door-card,
+  .showroom-card {
+    width: min(78vw, 240px);
+  }
+
+  .order-ease-dock {
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+    max-width: none;
+  }
+
+  .pdp-media {
+    min-height: 280px;
+  }
+
+  .floor-drill-chips,
+  .dest-cats {
+    padding-bottom: 0.25rem;
+  }
+
+  .floor-drill-chips button,
+  .dest-cats button {
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 420px) {
+  .pc3d-grid,
+  .dense-grid,
+  .floor-drill-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .orva-studio-brand strong {
+    font-size: 1.15rem;
   }
 }

@@ -37,10 +37,15 @@ export function SearchPage() {
             }}
           >
             <input
+              type="search"
+              className="orva-search-field"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={`Search ${config.brandName}…`}
               autoFocus
+              autoComplete="off"
+              enterKeyHint="search"
+              aria-label={`Search ${config.brandName}`}
             />
             <button type="submit" className="primary">
               Search
