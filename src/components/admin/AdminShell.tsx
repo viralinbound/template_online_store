@@ -73,10 +73,10 @@ export function AdminShell({ children, title, lead }: { children: ReactNode; tit
     <AdminAuthGate>
       <div className={`admin-app${navOpen ? " admin-nav-open" : ""}`}>
         <header className="admin-mobile-bar">
-          <button type="button" className="admin-mobile-brand" onClick={() => go("/admin")}>
+          <Link href="/" className="admin-mobile-brand" aria-label={`${config.brandName} storefront`}>
             <strong>{config.brandName}</strong>
             <span>Admin</span>
-          </button>
+          </Link>
           <div className="admin-mobile-actions">
             <button type="button" className="admin-mobile-signout" onClick={signOut}>
               Sign out
@@ -100,10 +100,10 @@ export function AdminShell({ children, title, lead }: { children: ReactNode; tit
         )}
 
         <aside className="admin-side">
-          <button type="button" className="admin-side-brand" onClick={() => go("/admin")}>
+          <Link href="/" className="admin-side-brand" aria-label={`${config.brandName} storefront`} onClick={() => setNavOpen(false)}>
             <strong>{config.brandName}</strong>
-            <span>Admin panel</span>
-          </button>
+            <span>Admin panel · home</span>
+          </Link>
           {nav}
           <div className="admin-side-user">
             <strong>{session?.name ?? "Admin"}</strong>
