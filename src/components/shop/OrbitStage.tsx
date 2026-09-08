@@ -210,6 +210,7 @@ export function OrbitStage({
           product={look}
           currency={currency}
           locale={locale}
+          initialColor={look.colors[0]}
           onClose={() => setLook(null)}
           onBuyNow={() => {
             onBuyNow?.(look);

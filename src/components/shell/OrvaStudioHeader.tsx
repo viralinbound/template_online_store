@@ -83,23 +83,23 @@ export function OrvaStudioHeader({
 
         {/* Order: Search → Orders → Account → Compare → Bag → Menu */}
         <div className="orva-studio-actions">
-          <Link href="/search" className="orva-studio-quiet">
+          <Link href="/search" className="orva-studio-quiet desk-only">
             Search
           </Link>
 
-          <Link href="/orders" className="orva-studio-quiet">
+          <Link href="/orders" className="orva-studio-quiet desk-only">
             Orders
           </Link>
 
           {isAdmin && (
-            <Link href="/admin" className="orva-studio-quiet orva-studio-admin">
+            <Link href="/admin" className="orva-studio-quiet orva-studio-admin desk-only">
               Admin
             </Link>
           )}
 
           {sessionName ? (
             <>
-              <span className="orva-studio-quiet orva-studio-user" title={sessionName}>
+              <span className="orva-studio-quiet orva-studio-user desk-only" title={sessionName}>
                 {sessionName}
               </span>
               {onSignOut && (
@@ -115,7 +115,7 @@ export function OrvaStudioHeader({
           )}
 
           {compareCount > 0 && (
-            <button type="button" className="orva-studio-quiet" onClick={onCompare}>
+            <button type="button" className="orva-studio-quiet orva-studio-compare" onClick={onCompare}>
               Compare {compareCount}
             </button>
           )}
@@ -182,6 +182,25 @@ export function OrvaStudioHeader({
                   </Link>
                 </motion.div>
               ))}
+              {compareCount > 0 && onCompare && (
+                <motion.div
+                  initial={reduce ? false : { opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.22 }}
+                >
+                  <button
+                    type="button"
+                    className="orva-studio-panel-auth"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onCompare();
+                    }}
+                  >
+                    <strong>Compare ({compareCount})</strong>
+                    <span>Side-by-side picks</span>
+                  </button>
+                </motion.div>
+              )}
               {!sessionName && onSignIn && (
                 <motion.div
                   initial={reduce ? false : { opacity: 0, y: 12 }}

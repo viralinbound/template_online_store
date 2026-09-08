@@ -130,6 +130,7 @@ export function BoutiqueShelfWalk({
           currency={currency}
           locale={locale}
           accent={accent}
+          initialColor={quick.colors[0]}
           onClose={() => setQuick(null)}
           onBuyNow={() => onBuyNow?.(quick)}
         />

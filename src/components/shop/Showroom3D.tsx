@@ -124,6 +124,7 @@ export function Showroom3D({
           currency={currency}
           locale={locale}
           accent={accent}
+          initialColor={look.colors[0]}
           onClose={() => setLook(null)}
           onBuyNow={() => {
             onBuyNow?.(look);

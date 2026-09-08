@@ -16,6 +16,8 @@ type Props = {
   currency?: string;
   locale?: string;
   accent?: string;
+  /** Color currently shown on the card / stage — keeps Look image in sync */
+  initialColor?: string;
   onClose: () => void;
   onBuyNow?: () => void;
 };
@@ -26,14 +28,20 @@ export function QuickLook3D({
   currency = "INR",
   locale = "en-IN",
   accent = "#14999c",
+  initialColor,
   onClose,
   onBuyNow,
 }: Props) {
   const addToBag = useMallStore((s) => s.addToBag);
   const toggleCompare = useMallStore((s) => s.toggleCompare);
   const compare = useMallStore((s) => s.compare);
-  const [color, setColor] = useState(product.colors[0] ?? "Default");
+  const startColor = initialColor || product.colors[0] || "Default";
+  const [color, setColor] = useState(startColor);
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setColor(initialColor || product.colors[0] || "Default");
+  }, [product.id, initialColor]); // eslint-disable-line react-hooks/exhaustive-deps -- sync when card color / product changes
 
   const src = useMemo(() => mediaForColor(product, color), [product, color]);
   const soldOut = product.stock != null && product.stock <= 0;

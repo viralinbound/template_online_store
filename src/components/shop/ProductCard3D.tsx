@@ -128,19 +128,20 @@ export function ProductCard3D({
             <Link href={productHref(product)} className="pc3d-view pc3d-fullpage">
               Full page
             </Link>
-            <button
-              type="button"
-              className={inCompare ? "on" : ""}
-              onClick={() => toggleCompare(product)}
-              title="Compare"
-            >
-              ⇄
-            </button>
-            <button type="button" onClick={() => addToBag(product, { color, size: product.sizes[0] })}>
+            <button type="button" className="pc3d-add" onClick={() => addToBag(product, { color, size: product.sizes[0] })}>
               Add
             </button>
             <button type="button" className="buy" onClick={buy}>
               Buy
+            </button>
+            <button
+              type="button"
+              className={`pc3d-compare${inCompare ? " on" : ""}`}
+              onClick={() => toggleCompare(product)}
+              title="Compare"
+              aria-label="Compare"
+            >
+              ⇄
             </button>
           </div>
         </div>
@@ -152,6 +153,7 @@ export function ProductCard3D({
           currency={currency}
           locale={locale}
           accent={accent}
+          initialColor={color}
           onClose={() => setQuick(false)}
           onBuyNow={() => onBuyNow?.(product)}
         />
